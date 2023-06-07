@@ -56,7 +56,15 @@ export const groupRouter = createTRPCRouter({
         groupId: z.string(),
       })
     )
-    .query(({ ctx, input }) => {
+    .query(async ({ ctx, input }) => {
+      function pause(milliseconds: number): Promise<void> {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve();
+          }, milliseconds);
+        });
+      }
+      await pause(2000);
       return ctx.prisma.expense.findMany({
         where: {
           groupId: input.groupId,

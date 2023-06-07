@@ -19,8 +19,7 @@ export const expenseRouter = createTRPCRouter({
             paid: z.number(),
             actualShare: z.number(),
           })
-          .array()
-          .nonempty(),
+          .array(),
         totalExpense: z.number(),
       })
     )

@@ -1,10 +1,11 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { Header } from "~/components/Header";
 import { api } from "~/utils/api";
 
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
 import { prisma } from "~/server/db";
+import AddExpenseModal from "~/components/AddExpenseModal";
 
 type Group = {
   name: string;
@@ -13,6 +14,7 @@ type Group = {
 
 type Participant = {
   id: string;
+  name: string | null;
 };
 
 export const getServerSideProps: GetServerSideProps<{
@@ -86,38 +88,52 @@ const dashboard = ({
   participants,
   groupId,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  console.log("groups = ", groups);
-  console.log("participants = ", participants);
+  const [showAddExpenseModal, setShowAddExpenseModal] =
+    useState<boolean>(false);
+  const { data: expenses, refetch: refetchExpenses, isLoading: expensesIsLoading} =
+    api.group.getAllExpenses.useQuery(
+      { groupId: groupId },
+      {
+        refetchOnWindowFocus: false,
+      }
+    );
 
-  const { data: expenses } = api.group.getAllExpenses.useQuery(
-    { groupId: groupId },
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
+  const expenseCreator = api.expense.create.useMutation({
+    onSuccess: () => {
+      void refetchExpenses();
+    },
+  });
 
-  const expenseCreator = api.expense.create.useMutation();
-  const addExpenseHandler = async () => {
-    expenseCreator.mutate({
-      expenseContributions: [
-        {
-          userId: participants[0]?.id!,
-          paid: 10,
-          actualShare: 20,
-        },
-        {
-          userId: participants[1]?.id!,
-          paid: 90,
-          actualShare: 80,
-        },
-      ],
-      expenseName: "Drinks",
-      groupId: groupId,
-      totalExpense: 100,
-    });
+  //TODO: Fix type
+  const addExpenseHandler = (expenseContributions: any) => {
+    setShowAddExpenseModal(true);
   };
+
   return (
     <div>
+      <div>
+        <AddExpenseModal
+          participants={participants}
+          isOpen={showAddExpenseModal}
+          message="Configure The expense"
+          onCancel={() => {
+            setShowAddExpenseModal(false);
+          }}
+          handleExpenseCreation={(
+            expenseName,
+            expenseContributions,
+            totalExpense
+          ) => {
+            setShowAddExpenseModal(false);
+            expenseCreator.mutate({
+              expenseContributions: expenseContributions,
+              expenseName: expenseName,
+              groupId: groupId,
+              totalExpense: totalExpense,
+            });
+          }}
+        />
+      </div>
       <Header />
       <div className="flex justify-center">
         <div className="grid grid-cols-8">
@@ -167,25 +183,29 @@ const dashboard = ({
               </div>
             </div>
 
-            <ul className="mx-2">
-              {expenses ? (
-                expenses.map((expense) => {
+            {(expenses && !expensesIsLoading) ? (
+              <ul className="mx-2">
+                {expenses.map((expense) => {
                   return (
-                    <li className="mb-2">
+                    <li key={expense.id} className="mb-2">
                       <div className="rounded-md bg-neutral-focus p-4 shadow-md">
                         <div className="text-lg font-bold">{expense.name}</div>
                         <div className="mt-2 flex items-center justify-between">
                           <div className="text-gray-500">Total expense</div>
-                          <div className="text-gray-500">${expense.totalExpense.toFixed(2)}</div>
+                          <div className="text-gray-500">
+                            ${expense.totalExpense.toFixed(2)}
+                          </div>
                         </div>
                       </div>
                     </li>
                   );
-                })
-              ) : (
+                })}
+              </ul>
+            ) : (
+              <div className="mt-8 flex items-center justify-center">
                 <progress className="progress w-56"></progress>
-              )}
-            </ul>
+              </div>
+            )}
           </div>
           <div className="col-span-2">
             <div className="mt-16 pl-4">
