@@ -6,6 +6,7 @@ import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
 import { prisma } from "~/server/db";
 import AddExpenseModal from "~/components/AddExpenseModal";
+import ExpenseDetailsModal from "~/components/ExpenseDetailsModal";
 
 type Group = {
   name: string;
@@ -85,6 +86,8 @@ export const getServerSideProps: GetServerSideProps<{
 
 const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showAddExpenseModal, setShowAddExpenseModal] = useState<boolean>(false);
+  const [showExpenseDetailsModel, setShowExpenseDetailsModal] = useState<boolean>(false);
+  const [selectedExpenseId, setSelectedExpenseId] = useState<string>("");
   const {
     data: expenses,
     refetch: refetchExpenses,
@@ -110,7 +113,7 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
   });
 
   //TODO: Fix type
-  const addExpenseHandler = (expenseContributions: any) => {
+  const addExpenseHandler = () => {
     setShowAddExpenseModal(true);
   };
 
@@ -134,8 +137,14 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
             });
           }}
         />
+        {showExpenseDetailsModel && <ExpenseDetailsModal expenseId={selectedExpenseId} 
+        onCancel={() => {
+          setShowExpenseDetailsModal(false);
+        }}
+        />}
       </div>
       <Header />
+
       <div className="flex justify-center">
         <div className="grid grid-cols-8">
           <div className="col-span-2 border-r-[1px] border-[#272d35]">
@@ -179,7 +188,7 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
             </div>
 
             {(!expenses || expensesIsLoading || expensesIsRefetching) && (
-              <div className="mt-4 mb-4 flex items-center justify-center">
+              <div className="mb-4 mt-4 flex items-center justify-center">
                 <progress className="progress w-56"></progress>
               </div>
             )}
@@ -187,7 +196,14 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
               <ul className="mx-2">
                 {expenses.map((expense) => {
                   return (
-                    <li key={expense.id} className="mb-2">
+                    <li
+                      key={expense.id}
+                      className="mb-2 hover:cursor-pointer"
+                      onClick={() => {
+                        setSelectedExpenseId(expense.id);
+                        setShowExpenseDetailsModal(true);
+                      }}
+                    >
                       <div className="rounded-md bg-neutral-focus p-4 shadow-md">
                         <div className="text-lg font-bold">{expense.name}</div>
                         <div className="mt-2 flex items-center justify-between">

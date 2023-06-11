@@ -21,10 +21,6 @@ const BaseLayout: FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-const NameAndTotal = () => {
-  return <></>;
-};
-
 const ShareModeDropDown = ({
   onModeClick,
   sharedEqually,

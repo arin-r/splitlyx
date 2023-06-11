@@ -34,7 +34,7 @@ export const expenseRouter = createTRPCRouter({
             "The total amount paid should equal the total value of actualShares which should also be equal to totalExpense. One or many of these conditions have failed.",
         });
       }
-      const expenseCreationResponse = await ctx.prisma.expense.create({
+      await ctx.prisma.expense.create({
         data: {
           groupId: input.groupId,
           expenseContributions: {
@@ -57,6 +57,7 @@ export const expenseRouter = createTRPCRouter({
           userId: true,
         },
       });
+
       await prisma.groupContribution.deleteMany({
         where: {
           groupId: input.groupId,
@@ -85,85 +86,40 @@ export const expenseRouter = createTRPCRouter({
         data: groupContributions,
       });
 
-      console.log("groupContributions = ", groupContributions);
-      const transactions = calculateTransactions(groupContributions, input.groupId);
+      //groupContributions is modified in the calculationTransactions(). As of now, using structuredClone
+      //does not make a difference, however it is the emphasize that groupContributions is modified in the function.
+      const transactions = calculateTransactions(structuredClone(groupContributions), input.groupId);
       await prisma.transaction.deleteMany({
         where: {
           groupId: input.groupId,
         },
       });
+
       await prisma.transaction.createMany({
         data: transactions,
       });
+    }),
 
-      // console.log("here");
-      // let k = 0;
-      // let transactions: {
-      //   payerId: string;
-      //   receiverId: string;
-      //   transactionAmount: number;
-      // }[] = [];
-      // const n = group.netExpenseContributions.length;
-      // for (let i = 0; i < n; ++i) {
-      //   const contri = group.netExpenseContributions[i]!;
-      //   let mustGet = contri.paid - contri.actualShare;
-      //   if (mustGet > 0) {
-      //     while (k < n) {
-      //       console.log("while");
-      //       const at = group.netExpenseContributions[k]!;
-      //       const canGive = at.actualShare - at.paid;
-      //       if (canGive > 0) {
-      //         if (mustGet === canGive) {
-      //           transactions.push({
-      //             payerId: at.userId,
-      //             receiverId: contri.userId,
-      //             transactionAmount: canGive,
-      //           });
-      //           group.netExpenseContributions[k]!.paid += canGive;
-      //           break;
-      //         } else if (mustGet > canGive) {
-      //           transactions.push({
-      //             payerId: at.userId,
-      //             receiverId: contri.userId,
-      //             transactionAmount: canGive,
-      //           });
-      //           group.netExpenseContributions[k]!.paid += canGive;
-      //           mustGet -= canGive;
-      //           k++;
-      //         } else {
-      //           transactions.push({
-      //             payerId: at.userId,
-      //             receiverId: contri.userId,
-      //             transactionAmount: canGive,
-      //           });
-      //           group.netExpenseContributions[k]!.paid += mustGet;
-      //           break;
-      //         }
-      //       } else {
-      //         k++;
-      //       }
-      //     }
-      //   }
-      // }
-
-      // console.log("here 2");
-      // // await prisma.transaction.deleteMany({
-      // //   where: {
-      // //     groupId: input.groupId,
-      // //   },
-      // // });
-
-      // await prisma.group.update({
-      //   where: {
-      //     id: input.groupId,
-      //   },
-      //   data: {
-      //     transaction: {
-      //       create: transactions,
-      //     },
-      //   },
-      // });
-
-      // console.log("ExpenseCreationResponse = ", expenseCreationResponse);
+  get: protectedProcedure
+    .input(
+      z.object({
+        expenseId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.expense.findUnique({
+        where: { id: input.expenseId },
+        select: {
+          expenseContributions: {
+            select: {
+              user: { select: { name: true, id: true }, },
+              paid: true,
+              actualShare: true,
+            },
+          },
+          totalExpense: true,
+          name: true,
+        },
+      });
     }),
 });
