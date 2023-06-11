@@ -83,24 +83,26 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
-const dashboard = ({
-  groups,
-  participants,
-  groupId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [showAddExpenseModal, setShowAddExpenseModal] =
-    useState<boolean>(false);
+const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [showAddExpenseModal, setShowAddExpenseModal] = useState<boolean>(false);
   const {
     data: expenses,
     refetch: refetchExpenses,
     isLoading: expensesIsLoading,
-  } = api.group.getAllExpenses.useQuery(
+    isRefetching: expensesIsRefetching,
+  } = api.group.getAllExpenses.useQuery({ groupId: groupId }, { refetchOnWindowFocus: false });
+
+  const { data: transactionData } = api.transaction.getAll.useQuery(
     { groupId: groupId },
-    {
-      refetchOnWindowFocus: false,
-    }
+    { refetchOnWindowFocus: false }
+  );
+  console.log("transactionData = ", transactionData);
+  const { data: groupContributions } = api.group.getAllGroupContributions.useQuery(
+    { groupId: groupId },
+    { refetchOnWindowFocus: false }
   );
 
+  console.log("groupContributions = ", groupContributions);
   const expenseCreator = api.expense.create.useMutation({
     onSuccess: () => {
       void refetchExpenses();
@@ -122,11 +124,7 @@ const dashboard = ({
           onCancel={() => {
             setShowAddExpenseModal(false);
           }}
-          handleExpenseCreation={(
-            expenseName,
-            expenseContributions,
-            totalExpense
-          ) => {
+          handleExpenseCreation={(expenseName, expenseContributions, totalExpense) => {
             setShowAddExpenseModal(false);
             expenseCreator.mutate({
               expenseContributions: expenseContributions,
@@ -152,10 +150,7 @@ const dashboard = ({
                     <li>No groups</li>
                   ) : (
                     groups.map((group) => (
-                      <li
-                        className="rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus"
-                        key={group.id}
-                      >
+                      <li className="rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus" key={group.id}>
                         - {group.name}
                       </li>
                     ))
@@ -175,10 +170,7 @@ const dashboard = ({
               <div className="flex items-center justify-between px-6 py-4">
                 <div className="mr-20 text-3xl font-bold">Hong Kong</div>
                 <div>
-                  <button
-                    className="btn-primary btn mr-2 px-2"
-                    onClick={addExpenseHandler}
-                  >
+                  <button className="btn-primary btn mr-2 px-2" onClick={addExpenseHandler}>
                     Add an Expense
                   </button>
                   <button className="btn-primary btn px-2 ">Settle up</button>
@@ -186,7 +178,12 @@ const dashboard = ({
               </div>
             </div>
 
-            {expenses && !expensesIsLoading ? (
+            {(!expenses || expensesIsLoading || expensesIsRefetching) && (
+              <div className="mt-4 mb-4 flex items-center justify-center">
+                <progress className="progress w-56"></progress>
+              </div>
+            )}
+            {expenses && (
               <ul className="mx-2">
                 {expenses.map((expense) => {
                   return (
@@ -195,19 +192,13 @@ const dashboard = ({
                         <div className="text-lg font-bold">{expense.name}</div>
                         <div className="mt-2 flex items-center justify-between">
                           <div className="text-gray-500">Total expense</div>
-                          <div className="text-gray-500">
-                            ${expense.totalExpense.toFixed(2)}
-                          </div>
+                          <div className="text-gray-500">${expense.totalExpense.toFixed(2)}</div>
                         </div>
                       </div>
                     </li>
                   );
                 })}
               </ul>
-            ) : (
-              <div className="mt-8 flex items-center justify-center">
-                <progress className="progress w-56"></progress>
-              </div>
             )}
           </div>
           <div className="col-span-2">

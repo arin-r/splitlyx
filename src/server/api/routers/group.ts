@@ -36,8 +36,8 @@ export const groupRouter = createTRPCRouter({
           expenses: true,
           name: true,
           participants: true,
-          GroupContribution: true,
-        }
+          groupContributions: true,
+        },
       });
       console.log("groupCreationResponse = ", groupCreationResponse);
     }),
@@ -84,6 +84,19 @@ export const groupRouter = createTRPCRouter({
       });
     }),
 
+  getAllGroupContributions: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.groupContribution.findMany({
+        where: {
+          groupId: input.groupId,
+        }
+      })
+    }),
 
   //dev only
   deleteAll: protectedProcedure.mutation(async ({ ctx, input }) => {

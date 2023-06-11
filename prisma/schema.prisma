@@ -59,9 +59,9 @@ model User {
 
     groups               Group[]
     expenseContributions ExpenseContribution[]
-    // payer                Transaction[]         @relation("payingUser")
-    // receiver             Transaction[]         @relation("recievingUser")
-    GroupContribution    GroupContribution[]
+    groupContributions   GroupContribution[]
+    payer                Transaction[]         @relation("payingUser")
+    receiver             Transaction[]         @relation("receivingUser")
 }
 
 model VerificationToken {
@@ -73,13 +73,13 @@ model VerificationToken {
 }
 
 model Group {
-    id                String              @id @default(cuid())
-    name              String
-    participants      User[]
-    createdAt         DateTime            @default(now())
-    expenses          Expense[]
-    // transaction       Transaction[]
-    GroupContribution GroupContribution[]
+    id                 String              @id @default(cuid())
+    name               String
+    participants       User[]
+    createdAt          DateTime            @default(now())
+    expenses           Expense[]
+    groupContributions GroupContribution[]
+    transactions       Transaction[]
 }
 
 model Expense {
@@ -111,13 +111,13 @@ model GroupContribution {
     groupId     String
 }
 
-// model Transaction {
-//     id                String @id @default(cuid())
-//     payerId           String
-//     receiverId        String
-//     payer             User   @relation("payingUser", fields: [payerId], references: [id])
-//     receiver          User   @relation("recievingUser", fields: [receiverId], references: [id])
-//     transactionAmount Float
-//     group             Group  @relation(fields: [groupId], references: [id])
-//     groupId           String
-// }
+model Transaction {
+    id                String  @id @default(cuid())
+    payerId           String
+    receiverId        String
+    payer             User    @relation("payingUser", fields: [payerId], references: [id])
+    receiver          User    @relation("receivingUser", fields: [receiverId], references: [id])
+    transactionAmount Float
+    group             Group   @relation(fields: [groupId], references: [id])
+    groupId           String
+}
