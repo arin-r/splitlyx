@@ -2,12 +2,9 @@ import { ExpenseContribution, Transaction } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { group } from "console";
 import { z } from "zod";
+import calculateTransactions from "~/lib/calculateTransactions";
 import { areFloatsEqual } from "~/lib/floatComparison";
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 
 const getGroupConrtibutions = () => {};
@@ -28,20 +25,9 @@ export const expenseRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const totalPaid = input.expenseContributions.reduce(
-        (accumulator, ec) => accumulator + ec.paid,
-        0
-      );
-      const totalActualShare = input.expenseContributions.reduce(
-        (accumulator, ec) => accumulator + ec.actualShare,
-        0
-      );
-      if (
-        !(
-          areFloatsEqual(totalPaid, totalActualShare) &&
-          areFloatsEqual(totalPaid, input.totalExpense)
-        )
-      ) {
+      const totalPaid = input.expenseContributions.reduce((accumulator, ec) => accumulator + ec.paid, 0);
+      const totalActualShare = input.expenseContributions.reduce((accumulator, ec) => accumulator + ec.actualShare, 0);
+      if (!(areFloatsEqual(totalPaid, totalActualShare) && areFloatsEqual(totalPaid, input.totalExpense))) {
         throw new TRPCError({
           code: "CONFLICT",
           message:
@@ -78,9 +64,7 @@ export const expenseRouter = createTRPCRouter({
       });
 
       for (const expContri of input.expenseContributions) {
-        const index = groupContributions.findIndex(
-          (grpContri) => grpContri.userId === expContri.userId
-        );
+        const index = groupContributions.findIndex((grpContri) => grpContri.userId === expContri.userId);
         if (index === -1) {
           groupContributions.push({
             actualShare: expContri.actualShare,
@@ -91,8 +75,7 @@ export const expenseRouter = createTRPCRouter({
         } else {
           groupContributions[index] = {
             ...groupContributions[index]!,
-            actualShare:
-              groupContributions[index]?.actualShare! + expContri.actualShare,
+            actualShare: groupContributions[index]?.actualShare! + expContri.actualShare,
             paid: groupContributions[index]?.paid! + expContri.paid,
           };
         }
@@ -103,69 +86,16 @@ export const expenseRouter = createTRPCRouter({
       });
 
       console.log("groupContributions = ", groupContributions);
-      let transactions: {
-        payerId: string;
-        receiverId: string;
-        transactionAmount: number;
-        groupId: string;
-      }[] = [];
-
-      let k = 0;
-      const N = groupContributions.length;
-      for (let i = 0; i < N; ++i) {
-        // why does typescript think this is undefined ?
-        const grpContri = groupContributions[i]!;
-        let mustGet = grpContri.paid - grpContri.actualShare;
-        if (mustGet > 0) {
-          while (k < N) {
-            const at = groupContributions[k]!;
-            const canGive = at.actualShare - at.paid;
-            if (canGive > 0) {
-              if (mustGet === canGive) {
-                transactions.push({
-                  groupId: input.groupId,
-                  payerId: at.userId,
-                  receiverId: grpContri.userId,
-                  transactionAmount: canGive,
-                });
-                groupContributions[k]!.paid += canGive;
-                break;
-              } else if (mustGet > canGive) {
-                transactions.push({
-                  groupId: input.groupId,
-                  payerId: at.userId,
-                  receiverId: grpContri.userId,
-                  transactionAmount: canGive,
-                });
-                groupContributions[k]!.paid += canGive;
-                mustGet -= canGive;
-                k++;
-              } else {
-                transactions.push({
-                  groupId: input.groupId,
-                  payerId: at.userId,
-                  receiverId: grpContri.userId,
-                  transactionAmount: mustGet,
-                });
-                groupContributions[k]!.paid += mustGet;
-                break;
-              }
-            } else {
-              k ++;
-            }
-          }
-        }
-      }
-
+      const transactions = calculateTransactions(groupContributions, input.groupId);
       await prisma.transaction.deleteMany({
         where: {
           groupId: input.groupId,
-        }
-      })
+        },
+      });
       await prisma.transaction.createMany({
-        data: transactions
-      })
-      
+        data: transactions,
+      });
+
       // console.log("here");
       // let k = 0;
       // let transactions: {
