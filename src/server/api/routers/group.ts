@@ -25,14 +25,21 @@ export const groupRouter = createTRPCRouter({
           id: true,
         },
       });
-      return ctx.prisma.group.create({
+      const groupCreationResponse = await ctx.prisma.group.create({
         data: {
           name: input.groupName,
           participants: {
             connect: userIds,
           },
         },
+        select: {
+          expenses: true,
+          name: true,
+          participants: true,
+          GroupContribution: true,
+        }
       });
+      console.log("groupCreationResponse = ", groupCreationResponse);
     }),
 
   getAll: protectedProcedure.query(({ ctx, input }) => {
@@ -76,6 +83,8 @@ export const groupRouter = createTRPCRouter({
         },
       });
     }),
+
+
   //dev only
   deleteAll: protectedProcedure.mutation(async ({ ctx, input }) => {
     return ctx.prisma.group.deleteMany({});

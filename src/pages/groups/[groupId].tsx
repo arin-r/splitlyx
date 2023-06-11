@@ -90,13 +90,16 @@ const dashboard = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showAddExpenseModal, setShowAddExpenseModal] =
     useState<boolean>(false);
-  const { data: expenses, refetch: refetchExpenses, isLoading: expensesIsLoading} =
-    api.group.getAllExpenses.useQuery(
-      { groupId: groupId },
-      {
-        refetchOnWindowFocus: false,
-      }
-    );
+  const {
+    data: expenses,
+    refetch: refetchExpenses,
+    isLoading: expensesIsLoading,
+  } = api.group.getAllExpenses.useQuery(
+    { groupId: groupId },
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const expenseCreator = api.expense.create.useMutation({
     onSuccess: () => {
@@ -183,7 +186,7 @@ const dashboard = ({
               </div>
             </div>
 
-            {(expenses && !expensesIsLoading) ? (
+            {expenses && !expensesIsLoading ? (
               <ul className="mx-2">
                 {expenses.map((expense) => {
                   return (
