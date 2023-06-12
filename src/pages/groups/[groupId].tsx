@@ -95,7 +95,7 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
     isRefetching: expensesIsRefetching,
   } = api.group.getAllExpenses.useQuery({ groupId: groupId }, { refetchOnWindowFocus: false });
 
-  const { data: balances, isLoading: balancesIsLoading } = api.group.getGroupBalances.useQuery(
+  const { data: balances, isLoading: balancesIsLoading, refetch: refetchBalances, isRefetching: balancesIsRefetching } = api.group.getGroupBalances.useQuery(
     { groupId: groupId },
     { refetchOnWindowFocus: false }
   );
@@ -103,12 +103,14 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
   const expenseCreator = api.expense.create.useMutation({
     onSuccess: () => {
       void refetchExpenses();
+      void refetchBalances();
     },
   });
 
   const expenseDeletor = api.expense.delete.useMutation({
     onSuccess(data, variables, context) {
       void refetchExpenses();
+      void refetchBalances();
     },
   });
 
@@ -217,8 +219,8 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
                       <div className="rounded-md bg-neutral-focus p-4 shadow-md">
                         <div className="text-lg font-bold">{expense.name}</div>
                         <div className="mt-2 flex items-center justify-between">
-                          <div className="text-gray-500">Total expense</div>
-                          <div className="text-gray-500">${expense.totalExpense.toFixed(2)}</div>
+                          <div className="">Total expense</div>
+                          <div className="">${expense.totalExpense.toFixed(2)}</div>
                         </div>
                       </div>
                     </li>
@@ -231,7 +233,7 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
             <div className="mt-16 pl-4">
               <p className="py-2 text-xl">Group Balances</p>
               <ul>
-                {balancesIsLoading && (
+                {(balancesIsLoading || balancesIsRefetching) && (
                   <div className="mb-4 mt-4 flex items-center justify-center">
                     <progress className="progress w-56"></progress>
                   </div>
