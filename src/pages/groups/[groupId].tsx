@@ -112,7 +112,12 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
     },
   });
 
-  //TODO: Fix type
+  const expenseDeletor = api.expense.delete.useMutation({
+    onSuccess(data, variables, context) {
+      void refetchExpenses();
+    },
+  });
+
   const addExpenseHandler = () => {
     setShowAddExpenseModal(true);
   };
@@ -137,11 +142,22 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
             });
           }}
         />
-        {showExpenseDetailsModel && <ExpenseDetailsModal expenseId={selectedExpenseId} 
-        onCancel={() => {
-          setShowExpenseDetailsModal(false);
-        }}
-        />}
+        {showExpenseDetailsModel && (
+          <ExpenseDetailsModal
+            expenseId={selectedExpenseId}
+            onCancel={() => {
+              setShowExpenseDetailsModal(false);
+            }}
+            onDelete={() => {
+              expenseDeletor.mutate({
+                expenseId: selectedExpenseId,
+                groupId: groupId,
+              });
+              setShowExpenseDetailsModal(false);
+              setSelectedExpenseId("");
+            }}
+          />
+        )}
       </div>
       <Header />
 

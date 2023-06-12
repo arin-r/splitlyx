@@ -4,6 +4,7 @@ import { api } from "~/utils/api";
 interface ExpenseDetailsModalProps {
   expenseId: string;
   onCancel: () => void;
+  onDelete: () => void;
 }
 
 const BaseLayout: FC<{ children: ReactNode }> = ({ children }) => {
@@ -19,7 +20,7 @@ const BaseLayout: FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-const ExpenseDetailsModal: FC<ExpenseDetailsModalProps> = ({ onCancel, expenseId }) => {
+const ExpenseDetailsModal: FC<ExpenseDetailsModalProps> = ({ onCancel, expenseId, onDelete}) => {
   const { data: expense, isLoading: expenseIsLoading } = api.expense.get.useQuery(
     { expenseId: expenseId },
     { refetchOnWindowFocus: false }
@@ -64,7 +65,12 @@ const ExpenseDetailsModal: FC<ExpenseDetailsModalProps> = ({ onCancel, expenseId
             </div>
           </div>
           <div className="flex justify-end">
-            <button className="btn-primary btn-sm btn mr-3">Delete</button>
+            <button className="btn-primary btn-sm btn mr-3"
+            onClick={() => {
+              //Is this the right way to do it?
+              //or onClick={onDelete}
+              onDelete();
+            }}>Delete</button>
             <button className="btn-primary btn-outline btn-sm btn" onClick={onCancel}>
               Cancel
             </button>

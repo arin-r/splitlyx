@@ -97,7 +97,7 @@ model ExpenseContribution {
     userId      String
     paid        Float
     actualShare Float
-    expense     Expense @relation(fields: [expenseId], references: [id])
+    expense     Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
     expenseId   String
 }
 
@@ -107,7 +107,7 @@ model GroupContribution {
     userId      String
     paid        Float
     actualShare Float
-    group       Group  @relation(fields: [groupId], references: [id])
+    group       Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
     groupId     String
 }
 

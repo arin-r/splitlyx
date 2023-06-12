@@ -5,7 +5,6 @@ import { z } from "zod";
 import calculateTransactions from "~/lib/calculateTransactions";
 import { areFloatsEqual } from "~/lib/floatComparison";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "~/server/api/trpc";
-import { prisma } from "~/server/db";
 
 const getGroupConrtibutions = () => {};
 export const expenseRouter = createTRPCRouter({
@@ -46,7 +45,7 @@ export const expenseRouter = createTRPCRouter({
         },
       });
 
-      let groupContributions = await prisma.groupContribution.findMany({
+      let groupContributions = await ctx.prisma.groupContribution.findMany({
         where: {
           groupId: input.groupId,
         },
@@ -58,7 +57,7 @@ export const expenseRouter = createTRPCRouter({
         },
       });
 
-      await prisma.groupContribution.deleteMany({
+      await ctx.prisma.groupContribution.deleteMany({
         where: {
           groupId: input.groupId,
         },
@@ -82,24 +81,115 @@ export const expenseRouter = createTRPCRouter({
         }
       }
 
-      await prisma.groupContribution.createMany({
+      await ctx.prisma.groupContribution.createMany({
         data: groupContributions,
       });
 
       //groupContributions is modified in the calculationTransactions(). As of now, using structuredClone
       //does not make a difference, however it is the emphasize that groupContributions is modified in the function.
       const transactions = calculateTransactions(structuredClone(groupContributions), input.groupId);
-      await prisma.transaction.deleteMany({
+      await ctx.prisma.transaction.deleteMany({
         where: {
           groupId: input.groupId,
         },
       });
 
-      await prisma.transaction.createMany({
+      await ctx.prisma.transaction.createMany({
         data: transactions,
       });
     }),
 
+  delete: protectedProcedure
+    .input(
+      z.object({
+        expenseId: z.string(),
+        /** I don't HAVE to accept this as a parameter, I can easily get this within the function
+         * using ctx.prisma.expense.findUnique({where: {id: input.expenseId}, select: {groupId: true}})
+         * */
+        groupId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      /**
+       * 0. Get curExpenseContributions
+       * 1. Delete the expense, and its expenseContributions
+       * 1. Modify groupContributions
+       * 2. Delete existing transactions
+       * 3. Recalculate transactions
+       * 4. Add new transactions
+       *
+       * TODO: Build efficient aglorithm to avoid deleteing all transactions & adding them again (step 2 & 4)
+       */
+
+      const expenseContributions = await ctx.prisma.expenseContribution.findMany({
+        where: {
+          expenseId: input.expenseId,
+        },
+        select: {
+          paid: true,
+          userId: true,
+          actualShare: true,
+        },
+      });
+      
+      /**
+       * Schema.prisma
+       * expense     Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+       * onDelete: Cascade should delete all the expenses. 
+       */
+      await ctx.prisma.expense.delete({
+        where: {
+          id: input.expenseId,
+        },
+      });
+
+      const groupContributions = await ctx.prisma.groupContribution.findMany({
+        where: {
+          groupId: input.groupId,
+        },
+        select: {
+          paid: true,
+          actualShare: true,
+          userId: true,
+          groupId: true,
+        },
+      });
+
+      await ctx.prisma.groupContribution.deleteMany({
+        where: {
+          groupId: input.groupId,
+        },
+      });
+
+      for (const expContri of expenseContributions) {
+        const index = groupContributions.findIndex((grpContri) => grpContri.userId === expContri.userId);
+        if (index === -1) {
+          throw new Error("Index of existing user not found in expense.delete. This is impossible.");
+        }
+        const curGrpContri = groupContributions[index]!;
+        groupContributions[index] = {
+          ...curGrpContri,
+          paid: curGrpContri.paid - expContri.paid,
+          actualShare: curGrpContri.actualShare - expContri.actualShare,
+        };
+      }
+
+      await ctx.prisma.groupContribution.createMany({
+        data: groupContributions,
+      });
+
+      const transactions = calculateTransactions(structuredClone(groupContributions), input.groupId);
+
+      await ctx.prisma.transaction.deleteMany({
+        where: {
+          groupId: input.groupId,
+        },
+      });
+
+      await ctx.prisma.transaction.createMany({
+        data: transactions,
+      });
+    }),
   get: protectedProcedure
     .input(
       z.object({
@@ -112,7 +202,7 @@ export const expenseRouter = createTRPCRouter({
         select: {
           expenseContributions: {
             select: {
-              user: { select: { name: true, id: true }, },
+              user: { select: { name: true, id: true } },
               paid: true,
               actualShare: true,
             },
