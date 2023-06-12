@@ -95,17 +95,11 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
     isRefetching: expensesIsRefetching,
   } = api.group.getAllExpenses.useQuery({ groupId: groupId }, { refetchOnWindowFocus: false });
 
-  const { data: transactionData } = api.transaction.getAll.useQuery(
-    { groupId: groupId },
-    { refetchOnWindowFocus: false }
-  );
-  console.log("transactionData = ", transactionData);
-  const { data: groupContributions } = api.group.getAllGroupContributions.useQuery(
+  const { data: balances, isLoading: balancesIsLoading } = api.group.getGroupBalances.useQuery(
     { groupId: groupId },
     { refetchOnWindowFocus: false }
   );
 
-  console.log("groupContributions = ", groupContributions);
   const expenseCreator = api.expense.create.useMutation({
     onSuccess: () => {
       void refetchExpenses();
@@ -237,25 +231,24 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
             <div className="mt-16 pl-4">
               <p className="py-2 text-xl">Group Balances</p>
               <ul>
-                <li className="border-b-[1px] border-[#272d35] pb-2">
-                  <div className="text-left">
-                    <div className="text-lg font-bold">Alpha</div>
-                    <div className="text-base italic">gets back $20.00</div>
+                {balancesIsLoading && (
+                  <div className="mb-4 mt-4 flex items-center justify-center">
+                    <progress className="progress w-56"></progress>
                   </div>
-                </li>
-
-                <li className="border-b-[1px] border-[#272d35] pb-2 pt-2">
-                  <div className="text-left">
-                    <div className="text-lg font-bold">Beta</div>
-                    <div className="text-base italic">owes $40.00</div>
-                  </div>
-                </li>
-                <li className="border-b-[1px] border-[#272d35] pb-2 pt-2">
-                  <div className="text-left">
-                    <div className="text-lg font-bold">Arin Roday</div>
-                    <div className="text-base italic">gets back $20.00</div>
-                  </div>
-                </li>
+                )}
+                {balances &&
+                  balances.map((balance, idx) => {
+                    return (
+                      <li key= {idx} className="border-b-[1px] border-[#272d35] pb-2">
+                        <div className="text-left">
+                          <div className="text-lg font-bold">{balance.user.name}</div>
+                          <div className="text-base italic">
+                            {balance.balance < 0 ? "gets back " : "owes "} {Math.abs(balance.balance)}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
               </ul>
             </div>
           </div>

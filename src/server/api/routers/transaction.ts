@@ -16,6 +16,11 @@ export const transactionRouter = createTRPCRouter({
       const transactions = await ctx.prisma.transaction.findMany({
         where: {
           groupId: input.groupId
+        },
+        select: {
+          payer: { select: { id: true, name: true, } },
+          receiver: { select: { id: true, name: true, } },
+          transactionAmount: true,
         }
       })
       console.log("transactions = ", transactions)

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import pause from "~/lib/pause";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const groupRouter = createTRPCRouter({
@@ -64,14 +65,7 @@ export const groupRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      function pause(milliseconds: number): Promise<void> {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve();
-          }, milliseconds);
-        });
-      }
-      await pause(2000);
+      // await pause(2000);
       return ctx.prisma.expense.findMany({
         where: {
           groupId: input.groupId,
@@ -94,10 +88,66 @@ export const groupRouter = createTRPCRouter({
       return ctx.prisma.groupContribution.findMany({
         where: {
           groupId: input.groupId,
-        }
-      })
+        },
+      });
     }),
 
+  getGroupBalances: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      console.log("insideKJLJasd")
+        const transactions = await ctx.prisma.transaction.findMany({
+        where: {
+          groupId: input.groupId
+        },
+        select: {
+          payer: { select: { id: true, name: true, } },
+          receiver: { select: { id: true, name: true, } },
+          transactionAmount: true,
+        }
+      })
+
+      const balances: {
+        user: {
+          id: string,
+          name: string,
+        },
+        balance: number, 
+      } [] = []
+
+      for(const tr of transactions) {
+        const payerIndex = balances.findIndex(b => b.user.id === tr.payer.id);
+        if(payerIndex === -1) {
+          balances.push({
+            user: {
+              id: tr.payer.id,
+              name: tr.payer.name || "user",
+            },
+            balance: tr.transactionAmount
+          })
+        } else {
+          balances[payerIndex]!.balance  += tr.transactionAmount;
+        }
+        const receiverIndex = balances.findIndex(b => b.user.id === tr.receiver.id);
+        if(receiverIndex === -1) {
+          balances.push({
+            user: {
+              id: tr.receiver.id,
+              name: tr.receiver.name || "user",
+            },
+            balance: - tr.transactionAmount
+          })
+        } else {
+          balances[receiverIndex]!.balance  -= tr.transactionAmount;
+        }
+      }
+
+      return balances;
+    }),
   //dev only
   deleteAll: protectedProcedure.mutation(async ({ ctx, input }) => {
     return ctx.prisma.group.deleteMany({});
