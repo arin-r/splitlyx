@@ -84,18 +84,32 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
-const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [showAddExpenseModal, setShowAddExpenseModal] = useState<boolean>(false);
-  const [showExpenseDetailsModel, setShowExpenseDetailsModal] = useState<boolean>(false);
+const dashboard = ({
+  groups,
+  participants,
+  groupId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [showAddExpenseModal, setShowAddExpenseModal] =
+    useState<boolean>(false);
+  const [showExpenseDetailsModel, setShowExpenseDetailsModal] =
+    useState<boolean>(false);
   const [selectedExpenseId, setSelectedExpenseId] = useState<string>("");
   const {
     data: expenses,
     refetch: refetchExpenses,
     isLoading: expensesIsLoading,
     isRefetching: expensesIsRefetching,
-  } = api.group.getAllExpenses.useQuery({ groupId: groupId }, { refetchOnWindowFocus: false });
+  } = api.group.getAllExpenses.useQuery(
+    { groupId: groupId },
+    { refetchOnWindowFocus: false }
+  );
 
-  const { data: balances, isLoading: balancesIsLoading, refetch: refetchBalances, isRefetching: balancesIsRefetching } = api.group.getGroupBalances.useQuery(
+  const {
+    data: balances,
+    isLoading: balancesIsLoading,
+    refetch: refetchBalances,
+    isRefetching: balancesIsRefetching,
+  } = api.group.getGroupBalances.useQuery(
     { groupId: groupId },
     { refetchOnWindowFocus: false }
   );
@@ -128,7 +142,11 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
           onCancel={() => {
             setShowAddExpenseModal(false);
           }}
-          handleExpenseCreation={(expenseName, expenseContributions, totalExpense) => {
+          handleExpenseCreation={(
+            expenseName,
+            expenseContributions,
+            totalExpense
+          ) => {
             setShowAddExpenseModal(false);
             expenseCreator.mutate({
               expenseContributions: expenseContributions,
@@ -171,7 +189,10 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
                     <li>No groups</li>
                   ) : (
                     groups.map((group) => (
-                      <li className="rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus" key={group.id}>
+                      <li
+                        className="rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus"
+                        key={group.id}
+                      >
                         - {group.name}
                       </li>
                     ))
@@ -191,7 +212,10 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
               <div className="flex items-center justify-between px-6 py-4">
                 <div className="mr-20 text-3xl font-bold">Hong Kong</div>
                 <div>
-                  <button className="btn-primary btn mr-2 px-2" onClick={addExpenseHandler}>
+                  <button
+                    className="btn-primary btn mr-2 px-2"
+                    onClick={addExpenseHandler}
+                  >
                     Add an Expense
                   </button>
                   <button className="btn-primary btn px-2 ">Settle up</button>
@@ -220,7 +244,9 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
                         <div className="text-lg font-bold">{expense.name}</div>
                         <div className="mt-2 flex items-center justify-between">
                           <div className="">Total expense</div>
-                          <div className="">${expense.totalExpense.toFixed(2)}</div>
+                          <div className="">
+                            ${expense.totalExpense.toFixed(2)}
+                          </div>
                         </div>
                       </div>
                     </li>
@@ -243,11 +269,17 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
                     const owes: boolean = balance.balance > 0;
                     // const style = owes ? "text-error italic " : "text-success italic ";
                     return (
-                      <li key= {idx} className="border-b-[1px] border-[#272d35] pb-2">
+                      <li
+                        key={idx}
+                        className="border-b-[1px] border-[#272d35] pb-2"
+                      >
                         <div className="text-left">
-                          <div className="text-lg font-bold">{balance.user.name}</div>
+                          <div className="text-lg font-bold">
+                            {balance.user.name}
+                          </div>
                           <div className="text-base italic">
-                            {owes ? "owes " : "gets back "} {Math.abs(balance.balance).toFixed(2)}
+                            {owes ? "owes " : "gets back "}{" "}
+                            {Math.abs(balance.balance).toFixed(2)}
                           </div>
                         </div>
                       </li>

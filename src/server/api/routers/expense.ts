@@ -4,7 +4,11 @@ import { group } from "console";
 import { z } from "zod";
 import calculateTransactions from "~/lib/calculateTransactions";
 import { areFloatsEqual } from "~/lib/floatComparison";
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  protectedProcedure,
+} from "~/server/api/trpc";
 
 const getGroupConrtibutions = () => {};
 export const expenseRouter = createTRPCRouter({
@@ -24,22 +28,39 @@ export const expenseRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const totalPaid = input.expenseContributions.reduce((accumulator, ec) => accumulator + ec.paid, 0);
-      console.log("🚀 ~ file: expense.ts ~ .mutation ~ totalPaid:", totalPaid)
-      const totalActualShare = input.expenseContributions.reduce((accumulator, ec) => accumulator + ec.actualShare, 0);
-      console.log("🚀 ~ file: expense.ts ~ .mutation ~ totalActualShare:", totalActualShare)
-      console.log("🚀 ~ file: expense.ts ~ .mutation ~ input.totalExpense:", input.totalExpense)
-      if (!(areFloatsEqual(totalPaid, totalActualShare) && areFloatsEqual(totalPaid, input.totalExpense))) {
+      const totalPaid = input.expenseContributions.reduce(
+        (accumulator, ec) => accumulator + ec.paid,
+        0
+      );
+      console.log("🚀 ~ file: expense.ts ~ .mutation ~ totalPaid:", totalPaid);
+      const totalActualShare = input.expenseContributions.reduce(
+        (accumulator, ec) => accumulator + ec.actualShare,
+        0
+      );
+      console.log(
+        "🚀 ~ file: expense.ts ~ .mutation ~ totalActualShare:",
+        totalActualShare
+      );
+      console.log(
+        "🚀 ~ file: expense.ts ~ .mutation ~ input.totalExpense:",
+        input.totalExpense
+      );
+      if (
+        !(
+          areFloatsEqual(totalPaid, totalActualShare) &&
+          areFloatsEqual(totalPaid, input.totalExpense)
+        )
+      ) {
         throw new TRPCError({
           code: "CONFLICT",
           message:
             "The total amount paid should equal the total value of actualShares which should also be equal to totalExpense. One or many of these conditions have failed.",
         });
       }
-      if(areFloatsEqual(input.totalExpense, 0.0)) {
+      if (areFloatsEqual(input.totalExpense, 0.0)) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Total Expense should be greater than 0"
+          message: "Total Expense should be greater than 0",
         });
       }
       await ctx.prisma.expense.create({
@@ -73,7 +94,9 @@ export const expenseRouter = createTRPCRouter({
       });
 
       for (const expContri of input.expenseContributions) {
-        const index = groupContributions.findIndex((grpContri) => grpContri.userId === expContri.userId);
+        const index = groupContributions.findIndex(
+          (grpContri) => grpContri.userId === expContri.userId
+        );
         if (index === -1) {
           groupContributions.push({
             actualShare: expContri.actualShare,
@@ -84,7 +107,8 @@ export const expenseRouter = createTRPCRouter({
         } else {
           groupContributions[index] = {
             ...groupContributions[index]!,
-            actualShare: groupContributions[index]?.actualShare! + expContri.actualShare,
+            actualShare:
+              groupContributions[index]?.actualShare! + expContri.actualShare,
             paid: groupContributions[index]?.paid! + expContri.paid,
           };
         }
@@ -96,7 +120,10 @@ export const expenseRouter = createTRPCRouter({
 
       //groupContributions is modified in the calculationTransactions(). As of now, using structuredClone
       //does not make a difference, however it is the emphasize that groupContributions is modified in the function.
-      const transactions = calculateTransactions(structuredClone(groupContributions), input.groupId);
+      const transactions = calculateTransactions(
+        structuredClone(groupContributions),
+        input.groupId
+      );
       await ctx.prisma.transaction.deleteMany({
         where: {
           groupId: input.groupId,
@@ -130,21 +157,22 @@ export const expenseRouter = createTRPCRouter({
        * TODO: Build efficient aglorithm to avoid deleteing all transactions & adding them again (step 2 & 4)
        */
 
-      const expenseContributions = await ctx.prisma.expenseContribution.findMany({
-        where: {
-          expenseId: input.expenseId,
-        },
-        select: {
-          paid: true,
-          userId: true,
-          actualShare: true,
-        },
-      });
-      
+      const expenseContributions =
+        await ctx.prisma.expenseContribution.findMany({
+          where: {
+            expenseId: input.expenseId,
+          },
+          select: {
+            paid: true,
+            userId: true,
+            actualShare: true,
+          },
+        });
+
       /**
        * Schema.prisma
        * expense     Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-       * onDelete: Cascade should delete all the expenses. 
+       * onDelete: Cascade should delete all the expenses.
        */
       await ctx.prisma.expense.delete({
         where: {
@@ -171,9 +199,13 @@ export const expenseRouter = createTRPCRouter({
       });
 
       for (const expContri of expenseContributions) {
-        const index = groupContributions.findIndex((grpContri) => grpContri.userId === expContri.userId);
+        const index = groupContributions.findIndex(
+          (grpContri) => grpContri.userId === expContri.userId
+        );
         if (index === -1) {
-          throw new Error("Index of existing user not found in expense.delete. This is impossible.");
+          throw new Error(
+            "Index of existing user not found in expense.delete. This is impossible."
+          );
         }
         const curGrpContri = groupContributions[index]!;
         groupContributions[index] = {
@@ -187,7 +219,10 @@ export const expenseRouter = createTRPCRouter({
         data: groupContributions,
       });
 
-      const transactions = calculateTransactions(structuredClone(groupContributions), input.groupId);
+      const transactions = calculateTransactions(
+        structuredClone(groupContributions),
+        input.groupId
+      );
 
       await ctx.prisma.transaction.deleteMany({
         where: {

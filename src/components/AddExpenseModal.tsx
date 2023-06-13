@@ -6,7 +6,11 @@ interface ConfirmationModalProps {
   participants: { id: string; name: string | null }[];
   handleExpenseCreation: (
     expenseName: string,
-    expenseContributions: { userId: string; paid: number; actualShare: number }[],
+    expenseContributions: {
+      userId: string;
+      paid: number;
+      actualShare: number;
+    }[],
     totalExpense: number
   ) => void;
   onCancel: () => void;
@@ -114,7 +118,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           type="number"
           value={totalExpense.toString()}
           onChange={(event) => {
-            setTotalExpense(parseFloat(parseFloat(event.target.value).toFixed(2)));
+            setTotalExpense(
+              parseFloat(parseFloat(event.target.value).toFixed(2))
+            );
           }}
           className="input-bordered input-primary input w-full"
         />
@@ -123,7 +129,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <p className="font-bold">Amount paid by: </p>
         {participants.map((participant) => {
           const index = expenseContributions.findIndex(
-            (expenseContribution) => expenseContribution.userId === participant.id
+            (expenseContribution) =>
+              expenseContribution.userId === participant.id
           );
           return (
             <div key={participant.id} className="my-2 flex items-center">
@@ -142,7 +149,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     if (!t2) {
                       throw new Error("Impossible Case");
                     }
-                    if (!event.target.value || event.target.value.length === 0) {
+                    if (
+                      !event.target.value ||
+                      event.target.value.length === 0
+                    ) {
                       t1[index] = {
                         paid: 0,
                         actualShare: t2.actualShare,
@@ -150,7 +160,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                       };
                     } else {
                       t1[index] = {
-                        paid: parseFloat(parseFloat(event.target.value).toFixed(2)),
+                        paid: parseFloat(
+                          parseFloat(event.target.value).toFixed(2)
+                        ),
                         actualShare: t2.actualShare,
                         userId: t2.userId,
                       };
@@ -169,7 +181,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <label tabIndex={0} className="btn-sm btn m-1">
             {sharedEqually ? "Equally" : "Unequally"}
           </label>
-          <ul tabIndex={0} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
+          <ul
+            tabIndex={0}
+            className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow"
+          >
             <li>
               <a
                 onClick={() => {
@@ -200,14 +215,20 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         </div>
         {!sharedEqually && (
           <>
-            <h2 className="text-lg font-bold">Enter the actual share of each participant</h2>
+            <h2 className="text-lg font-bold">
+              Enter the actual share of each participant
+            </h2>
             {participants.map((participant) => {
               const index = expenseContributions.findIndex(
-                (expenseContribution) => expenseContribution.userId === participant.id
+                (expenseContribution) =>
+                  expenseContribution.userId === participant.id
               );
               return (
                 <div key={participant.id} className="my-2 flex items-center">
-                  <label htmlFor={`${participant.id}-amt-paid`} className="mr-2">
+                  <label
+                    htmlFor={`${participant.id}-amt-paid`}
+                    className="mr-2"
+                  >
                     {participant.name}
                   </label>
                   <input
@@ -222,7 +243,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                         if (!t2) {
                           throw new Error("Impossible Case");
                         }
-                        if (!event.target.value || event.target.value.length === 0) {
+                        if (
+                          !event.target.value ||
+                          event.target.value.length === 0
+                        ) {
                           t1[index] = {
                             paid: t2.paid,
                             actualShare: 0,
@@ -231,7 +255,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                         } else {
                           t1[index] = {
                             paid: t2.paid,
-                            actualShare: parseFloat(parseFloat(event.target.value).toFixed(2)),
+                            actualShare: parseFloat(
+                              parseFloat(event.target.value).toFixed(2)
+                            ),
                             userId: t2.userId,
                           };
                         }
@@ -254,17 +280,28 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             if (sharedEqually) {
               handleExpenseCreation(
                 expenseName,
-                calculateSharedExpenseContributions(participants.length, expenseContributions, totalExpense),
+                calculateSharedExpenseContributions(
+                  participants.length,
+                  expenseContributions,
+                  totalExpense
+                ),
                 totalExpense
               );
             } else {
-              handleExpenseCreation(expenseName, expenseContributions, totalExpense);
+              handleExpenseCreation(
+                expenseName,
+                expenseContributions,
+                totalExpense
+              );
             }
           }}
         >
           Confirm
         </button>
-        <button className="btn-primary btn-outline btn-sm btn" onClick={onCancel}>
+        <button
+          className="btn-primary btn-outline btn-sm btn"
+          onClick={onCancel}
+        >
           Cancel
         </button>
       </div>

@@ -99,48 +99,50 @@ export const groupRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      console.log("insideKJLJasd")
+      console.log("insideKJLJasd");
       const transactions = await ctx.prisma.transaction.findMany({
         where: {
-          groupId: input.groupId
+          groupId: input.groupId,
         },
         select: {
-          payer: { select: { id: true, name: true, } },
-          receiver: { select: { id: true, name: true, } },
+          payer: { select: { id: true, name: true } },
+          receiver: { select: { id: true, name: true } },
           transactionAmount: true,
-        }
-      })
+        },
+      });
 
       const balances: {
         user: {
-          id: string,
-          name: string,
-        },
-        balance: number,
-      }[] = []
+          id: string;
+          name: string;
+        };
+        balance: number;
+      }[] = [];
 
       for (const tr of transactions) {
-        const payerIndex = balances.findIndex(b => b.user.id === tr.payer.id);
+        const payerIndex = balances.findIndex((b) => b.user.id === tr.payer.id);
         if (payerIndex === -1) {
           balances.push({
             user: {
               id: tr.payer.id,
               name: tr.payer.name || "user",
             },
-            balance: tr.transactionAmount
-          })
+            balance: tr.transactionAmount,
+          });
         } else {
           balances[payerIndex]!.balance += tr.transactionAmount;
         }
-        const receiverIndex = balances.findIndex(b => b.user.id === tr.receiver.id);
+        const receiverIndex = balances.findIndex(
+          (b) => b.user.id === tr.receiver.id
+        );
         if (receiverIndex === -1) {
           balances.push({
             user: {
               id: tr.receiver.id,
               name: tr.receiver.name || "user",
             },
-            balance: - tr.transactionAmount
-          })
+            balance: -tr.transactionAmount,
+          });
         } else {
           balances[receiverIndex]!.balance -= tr.transactionAmount;
         }
@@ -150,27 +152,25 @@ export const groupRouter = createTRPCRouter({
     }),
 
   settleAllExpense: protectedProcedure
-    .input(z.object({ groupId: z.string(), }))
+    .input(z.object({ groupId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const groupContributions = await ctx.prisma.groupContribution.findMany({
         where: {
-          groupId: input.groupId
+          groupId: input.groupId,
         },
         select: {
           userId: true,
           paid: true,
           actualShare: true,
           groupId: true,
-        }
-      })
+        },
+      });
 
       await ctx.prisma.groupContribution.deleteMany({
         where: {
-          groupId: input.groupId
-        }
+          groupId: input.groupId,
+        },
       });
-
-
     }),
   //dev only
   deleteAll: protectedProcedure.mutation(async ({ ctx, input }) => {

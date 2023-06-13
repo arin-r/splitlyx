@@ -15,15 +15,15 @@ export const transactionRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const transactions = await ctx.prisma.transaction.findMany({
         where: {
-          groupId: input.groupId
+          groupId: input.groupId,
         },
         select: {
-          payer: { select: { id: true, name: true, } },
-          receiver: { select: { id: true, name: true, } },
+          payer: { select: { id: true, name: true } },
+          receiver: { select: { id: true, name: true } },
           transactionAmount: true,
-        }
-      })
-      console.log("transactions = ", transactions)
-      return transactions
+        },
+      });
+      console.log("transactions = ", transactions);
+      return transactions;
     }),
 });

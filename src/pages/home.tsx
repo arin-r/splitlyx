@@ -4,15 +4,17 @@ import { api } from "~/utils/api";
 interface homeProps {}
 
 const Comp: FC<{ expenseId: string }> = ({ expenseId }) => {
-  const { data: expense, isLoading: expenseIsLoading } = api.expense.get.useQuery(
-    { expenseId: expenseId },
-    { refetchOnWindowFocus: false }
-  );
-  return <div>Welcome 
+  const { data: expense, isLoading: expenseIsLoading } =
+    api.expense.get.useQuery(
+      { expenseId: expenseId },
+      { refetchOnWindowFocus: false }
+    );
+  return (
     <div>
-      {expense?.name}
+      Welcome
+      <div>{expense?.name}</div>
     </div>
-  </div>;
+  );
 };
 const home: FC<homeProps> = ({}) => {
   const [show, setShow] = useState<boolean>(false);

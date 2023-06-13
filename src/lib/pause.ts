@@ -3,7 +3,9 @@
  * to check working of loading states
  */
 
-const pause: (milliseconds: number) => Promise<void> = (milliseconds: number) => {
+const pause: (milliseconds: number) => Promise<void> = (
+  milliseconds: number
+) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve();

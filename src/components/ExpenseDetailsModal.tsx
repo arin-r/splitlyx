@@ -20,11 +20,16 @@ const BaseLayout: FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-const ExpenseDetailsModal: FC<ExpenseDetailsModalProps> = ({ onCancel, expenseId, onDelete}) => {
-  const { data: expense, isLoading: expenseIsLoading } = api.expense.get.useQuery(
-    { expenseId: expenseId },
-    { refetchOnWindowFocus: false }
-  );
+const ExpenseDetailsModal: FC<ExpenseDetailsModalProps> = ({
+  onCancel,
+  expenseId,
+  onDelete,
+}) => {
+  const { data: expense, isLoading: expenseIsLoading } =
+    api.expense.get.useQuery(
+      { expenseId: expenseId },
+      { refetchOnWindowFocus: false }
+    );
   return (
     <BaseLayout>
       {expenseIsLoading && (
@@ -58,20 +63,27 @@ const ExpenseDetailsModal: FC<ExpenseDetailsModalProps> = ({ onCancel, expenseId
             </table>
           </div>
           <div className="divider"></div>
-          <div className="container mx-auto mt-7 mb-4">
+          <div className="container mx-auto mb-4 mt-7">
             <div className="flex items-center justify-between ">
               <p className="text-lg font-bold">Total Expense</p>
               <p className="text-lg font-bold">{expense.totalExpense}</p>
             </div>
           </div>
           <div className="flex justify-end">
-            <button className="btn-primary btn-sm btn mr-3"
-            onClick={() => {
-              //Is this the right way to do it?
-              //or onClick={onDelete}
-              onDelete();
-            }}>Delete</button>
-            <button className="btn-primary btn-outline btn-sm btn" onClick={onCancel}>
+            <button
+              className="btn-primary btn-sm btn mr-3"
+              onClick={() => {
+                //Is this the right way to do it?
+                //or onClick={onDelete}
+                onDelete();
+              }}
+            >
+              Delete
+            </button>
+            <button
+              className="btn-primary btn-outline btn-sm btn"
+              onClick={onCancel}
+            >
               Cancel
             </button>
           </div>
