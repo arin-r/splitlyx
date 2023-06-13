@@ -100,7 +100,7 @@ export const groupRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       console.log("insideKJLJasd")
-        const transactions = await ctx.prisma.transaction.findMany({
+      const transactions = await ctx.prisma.transaction.findMany({
         where: {
           groupId: input.groupId
         },
@@ -116,12 +116,12 @@ export const groupRouter = createTRPCRouter({
           id: string,
           name: string,
         },
-        balance: number, 
-      } [] = []
+        balance: number,
+      }[] = []
 
-      for(const tr of transactions) {
+      for (const tr of transactions) {
         const payerIndex = balances.findIndex(b => b.user.id === tr.payer.id);
-        if(payerIndex === -1) {
+        if (payerIndex === -1) {
           balances.push({
             user: {
               id: tr.payer.id,
@@ -130,10 +130,10 @@ export const groupRouter = createTRPCRouter({
             balance: tr.transactionAmount
           })
         } else {
-          balances[payerIndex]!.balance  += tr.transactionAmount;
+          balances[payerIndex]!.balance += tr.transactionAmount;
         }
         const receiverIndex = balances.findIndex(b => b.user.id === tr.receiver.id);
-        if(receiverIndex === -1) {
+        if (receiverIndex === -1) {
           balances.push({
             user: {
               id: tr.receiver.id,
@@ -142,11 +142,35 @@ export const groupRouter = createTRPCRouter({
             balance: - tr.transactionAmount
           })
         } else {
-          balances[receiverIndex]!.balance  -= tr.transactionAmount;
+          balances[receiverIndex]!.balance -= tr.transactionAmount;
         }
       }
 
       return balances;
+    }),
+
+  settleAllExpense: protectedProcedure
+    .input(z.object({ groupId: z.string(), }))
+    .mutation(async ({ ctx, input }) => {
+      const groupContributions = await ctx.prisma.groupContribution.findMany({
+        where: {
+          groupId: input.groupId
+        },
+        select: {
+          userId: true,
+          paid: true,
+          actualShare: true,
+          groupId: true,
+        }
+      })
+
+      await ctx.prisma.groupContribution.deleteMany({
+        where: {
+          groupId: input.groupId
+        }
+      });
+
+
     }),
   //dev only
   deleteAll: protectedProcedure.mutation(async ({ ctx, input }) => {

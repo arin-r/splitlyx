@@ -101,7 +101,7 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
   );
 
   const expenseCreator = api.expense.create.useMutation({
-    onSuccess: () => {
+    onSuccess(data, variables, context) {
       void refetchExpenses();
       void refetchBalances();
     },
@@ -178,11 +178,11 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
                   )}
                 </ul>
                 <div className="divider"></div>
-                <li>Friends</li>
+                {/* <li>Friends</li>
                 <ul className="ml-1 text-lg">
                   <li>- Alpha</li>
                   <li>- Beta</li>
-                </ul>
+                </ul> */}
               </ul>
             </div>
           </div>
@@ -240,12 +240,14 @@ const dashboard = ({ groups, participants, groupId }: InferGetServerSidePropsTyp
                 )}
                 {balances &&
                   balances.map((balance, idx) => {
+                    const owes: boolean = balance.balance > 0;
+                    // const style = owes ? "text-error italic " : "text-success italic ";
                     return (
                       <li key= {idx} className="border-b-[1px] border-[#272d35] pb-2">
                         <div className="text-left">
                           <div className="text-lg font-bold">{balance.user.name}</div>
                           <div className="text-base italic">
-                            {balance.balance < 0 ? "gets back " : "owes "} {Math.abs(balance.balance)}
+                            {owes ? "owes " : "gets back "} {Math.abs(balance.balance).toFixed(2)}
                           </div>
                         </div>
                       </li>

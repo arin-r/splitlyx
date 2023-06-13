@@ -25,12 +25,21 @@ export const expenseRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const totalPaid = input.expenseContributions.reduce((accumulator, ec) => accumulator + ec.paid, 0);
+      console.log("🚀 ~ file: expense.ts ~ .mutation ~ totalPaid:", totalPaid)
       const totalActualShare = input.expenseContributions.reduce((accumulator, ec) => accumulator + ec.actualShare, 0);
+      console.log("🚀 ~ file: expense.ts ~ .mutation ~ totalActualShare:", totalActualShare)
+      console.log("🚀 ~ file: expense.ts ~ .mutation ~ input.totalExpense:", input.totalExpense)
       if (!(areFloatsEqual(totalPaid, totalActualShare) && areFloatsEqual(totalPaid, input.totalExpense))) {
         throw new TRPCError({
           code: "CONFLICT",
           message:
             "The total amount paid should equal the total value of actualShares which should also be equal to totalExpense. One or many of these conditions have failed.",
+        });
+      }
+      if(areFloatsEqual(input.totalExpense, 0.0)) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Total Expense should be greater than 0"
         });
       }
       await ctx.prisma.expense.create({
