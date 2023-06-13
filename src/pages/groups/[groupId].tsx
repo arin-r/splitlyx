@@ -55,7 +55,6 @@ export const getServerSideProps: GetServerSideProps<{
       },
     },
   });
-  console.log(ctx.params?.groupId);
 
   const participants = await prisma.user.findMany({
     where: {

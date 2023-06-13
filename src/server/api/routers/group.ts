@@ -40,7 +40,6 @@ export const groupRouter = createTRPCRouter({
           groupContributions: true,
         },
       });
-      console.log("groupCreationResponse = ", groupCreationResponse);
     }),
 
   getAll: protectedProcedure.query(({ ctx, input }) => {
@@ -99,7 +98,6 @@ export const groupRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      console.log("insideKJLJasd");
       const transactions = await ctx.prisma.transaction.findMany({
         where: {
           groupId: input.groupId,

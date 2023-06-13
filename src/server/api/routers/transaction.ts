@@ -23,7 +23,6 @@ export const transactionRouter = createTRPCRouter({
           transactionAmount: true,
         },
       });
-      console.log("transactions = ", transactions);
       return transactions;
     }),
 });

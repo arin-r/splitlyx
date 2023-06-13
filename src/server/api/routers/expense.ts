@@ -32,18 +32,9 @@ export const expenseRouter = createTRPCRouter({
         (accumulator, ec) => accumulator + ec.paid,
         0
       );
-      console.log("🚀 ~ file: expense.ts ~ .mutation ~ totalPaid:", totalPaid);
       const totalActualShare = input.expenseContributions.reduce(
         (accumulator, ec) => accumulator + ec.actualShare,
         0
-      );
-      console.log(
-        "🚀 ~ file: expense.ts ~ .mutation ~ totalActualShare:",
-        totalActualShare
-      );
-      console.log(
-        "🚀 ~ file: expense.ts ~ .mutation ~ input.totalExpense:",
-        input.totalExpense
       );
       if (
         !(

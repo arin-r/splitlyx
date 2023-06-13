@@ -92,7 +92,6 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   const [expenseName, setExpenseName] = useState<string>("Expense Name");
   const [totalExpense, setTotalExpense] = useState<number>(0);
   const dropDownDivRef = useRef<HTMLDivElement>(null);
-  console.log("1 expenseContributions = ", expenseContributions);
   return (
     <BaseLayout>
       <h2 className="mb-4 text-xl font-bold">Configure the expense</h2>
@@ -142,7 +141,6 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 type="number"
                 value={expenseContributions[index]!.paid.toString()}
                 onChange={(event) => {
-                  console.log("value = ", event.target.value);
                   setExpenseContributions((prevExpenseContributions) => {
                     const t1 = [...prevExpenseContributions];
                     const t2 = t1[index];
@@ -236,7 +234,6 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     type="number"
                     value={expenseContributions[index]!.actualShare.toString()}
                     onChange={(event) => {
-                      console.log("value = ", event.target.value);
                       setExpenseContributions((prevExpenseContributions) => {
                         const t1 = [...prevExpenseContributions];
                         const t2 = t1[index];
