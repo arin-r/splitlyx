@@ -1,5 +1,4 @@
 import { z } from "zod";
-import pause from "~/lib/pause";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const groupRouter = createTRPCRouter({
@@ -98,14 +97,14 @@ export const groupRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const transactions = await ctx.prisma.transaction.findMany({
+      const repayments = await ctx.prisma.repayment.findMany({
         where: {
           groupId: input.groupId,
         },
         select: {
           payer: { select: { id: true, name: true } },
           receiver: { select: { id: true, name: true } },
-          transactionAmount: true,
+          repaymentAmount: true,
         },
       });
 
@@ -117,7 +116,7 @@ export const groupRouter = createTRPCRouter({
         balance: number;
       }[] = [];
 
-      for (const tr of transactions) {
+      for (const tr of repayments) {
         const payerIndex = balances.findIndex((b) => b.user.id === tr.payer.id);
         if (payerIndex === -1) {
           balances.push({
@@ -125,10 +124,10 @@ export const groupRouter = createTRPCRouter({
               id: tr.payer.id,
               name: tr.payer.name || "user",
             },
-            balance: tr.transactionAmount,
+            balance: tr.repaymentAmount,
           });
         } else {
-          balances[payerIndex]!.balance += tr.transactionAmount;
+          balances[payerIndex]!.balance += tr.repaymentAmount;
         }
         const receiverIndex = balances.findIndex(
           (b) => b.user.id === tr.receiver.id
@@ -139,10 +138,10 @@ export const groupRouter = createTRPCRouter({
               id: tr.receiver.id,
               name: tr.receiver.name || "user",
             },
-            balance: -tr.transactionAmount,
+            balance: -tr.repaymentAmount,
           });
         } else {
-          balances[receiverIndex]!.balance -= tr.transactionAmount;
+          balances[receiverIndex]!.balance -= tr.repaymentAmount;
         }
       }
 

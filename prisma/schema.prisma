@@ -60,8 +60,8 @@ model User {
     groups               Group[]
     expenseContributions ExpenseContribution[]
     groupContributions   GroupContribution[]
-    payer                Transaction[]         @relation("payingUser")
-    receiver             Transaction[]         @relation("receivingUser")
+    payer                Repayment[]         @relation("payingUser")
+    receiver             Repayment[]         @relation("receivingUser")
 }
 
 model VerificationToken {
@@ -79,7 +79,7 @@ model Group {
     createdAt          DateTime            @default(now())
     expenses           Expense[]
     groupContributions GroupContribution[]
-    transactions       Transaction[]
+    repayments Repayment[]
 }
 
 model Expense {
@@ -111,13 +111,13 @@ model GroupContribution {
     groupId     String
 }
 
-model Transaction {
+model Repayment {
     id                String  @id @default(cuid())
     payerId           String
     receiverId        String
     payer             User    @relation("payingUser", fields: [payerId], references: [id])
     receiver          User    @relation("receivingUser", fields: [receiverId], references: [id])
-    transactionAmount Float
+    repaymentAmount Float
     group             Group   @relation(fields: [groupId], references: [id])
     groupId           String
 }

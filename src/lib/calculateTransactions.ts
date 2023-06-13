@@ -7,10 +7,10 @@ const calculateTransactions = (
   }[],
   groupId: string
 ) => {
-  let transactions: {
+  let repayments: {
     payerId: string;
     receiverId: string;
-    transactionAmount: number;
+    repaymentAmount: number;
     groupId: string;
   }[] = [];
 
@@ -26,30 +26,30 @@ const calculateTransactions = (
         const canGive = at.actualShare - at.paid;
         if (canGive > 0) {
           if (mustGet === canGive) {
-            transactions.push({
+            repayments.push({
               groupId: groupId,
               payerId: at.userId,
               receiverId: grpContri.userId,
-              transactionAmount: canGive,
+              repaymentAmount: canGive,
             });
             groupContributions[k]!.paid += canGive;
             break;
           } else if (mustGet > canGive) {
-            transactions.push({
+            repayments.push({
               groupId: groupId,
               payerId: at.userId,
               receiverId: grpContri.userId,
-              transactionAmount: canGive,
+              repaymentAmount: canGive,
             });
             groupContributions[k]!.paid += canGive;
             mustGet -= canGive;
             k++;
           } else {
-            transactions.push({
+            repayments.push({
               groupId: groupId,
               payerId: at.userId,
               receiverId: grpContri.userId,
-              transactionAmount: mustGet,
+              repaymentAmount: mustGet,
             });
             groupContributions[k]!.paid += mustGet;
             break;
@@ -61,7 +61,7 @@ const calculateTransactions = (
     }
   }
 
-  return transactions;
+  return repayments;
 };
 
 export default calculateTransactions;

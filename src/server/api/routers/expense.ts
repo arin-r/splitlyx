@@ -1,12 +1,9 @@
-import { ExpenseContribution, Transaction } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { group } from "console";
 import { z } from "zod";
 import calculateTransactions from "~/lib/calculateTransactions";
 import { areFloatsEqual } from "~/lib/floatComparison";
 import {
   createTRPCRouter,
-  publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
 
@@ -111,18 +108,18 @@ export const expenseRouter = createTRPCRouter({
 
       //groupContributions is modified in the calculationTransactions(). As of now, using structuredClone
       //does not make a difference, however it is the emphasize that groupContributions is modified in the function.
-      const transactions = calculateTransactions(
+      const repayments = calculateTransactions(
         structuredClone(groupContributions),
         input.groupId
       );
-      await ctx.prisma.transaction.deleteMany({
+      await ctx.prisma.repayment.deleteMany({
         where: {
           groupId: input.groupId,
         },
       });
 
-      await ctx.prisma.transaction.createMany({
-        data: transactions,
+      await ctx.prisma.repayment.createMany({
+        data: repayments,
       });
     }),
 
@@ -141,11 +138,11 @@ export const expenseRouter = createTRPCRouter({
        * 0. Get curExpenseContributions
        * 1. Delete the expense, and its expenseContributions
        * 1. Modify groupContributions
-       * 2. Delete existing transactions
-       * 3. Recalculate transactions
-       * 4. Add new transactions
+       * 2. Delete existing repayments
+       * 3. Recalculate repayments
+       * 4. Add new repayments
        *
-       * TODO: Build efficient aglorithm to avoid deleteing all transactions & adding them again (step 2 & 4)
+       * TODO: Build efficient aglorithm to avoid deleteing all repayments & adding them again (step 2 & 4)
        */
 
       const expenseContributions =
@@ -210,19 +207,19 @@ export const expenseRouter = createTRPCRouter({
         data: groupContributions,
       });
 
-      const transactions = calculateTransactions(
+      const repayments = calculateTransactions(
         structuredClone(groupContributions),
         input.groupId
       );
 
-      await ctx.prisma.transaction.deleteMany({
+      await ctx.prisma.repayment.deleteMany({
         where: {
           groupId: input.groupId,
         },
       });
 
-      await ctx.prisma.transaction.createMany({
-        data: transactions,
+      await ctx.prisma.repayment.createMany({
+        data: repayments,
       });
     }),
   get: protectedProcedure
