@@ -3,7 +3,7 @@ import React, { FC, ReactNode, useRef, useState } from "react";
 interface ConfirmationModalProps {
   isOpen: boolean;
   message: string;
-  participants: { id: string; name: string | null }[];
+  members: { id: string; name: string | null }[];
   handleExpenseCreation: (
     expenseName: string,
     expenseContributions: {
@@ -29,36 +29,8 @@ const BaseLayout: FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-// const ShareModeDropDown = ({
-//   onModeClick,
-//   sharedEqually,
-// }: {
-//   onModeClick: () => void;
-//   sharedEqually: boolean;
-// }) => {
-//   const dropDownDivRef = useRef<HTMLDivElement>(null);
-//   return (
-//     <div ref={dropDownDivRef} className="dropdown">
-//       <label tabIndex={0} className="btn-sm btn m-1">
-//         {sharedEqually ? "Equally" : "Unequally"}
-//       </label>
-//       <ul
-//         tabIndex={0}
-//         className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow"
-//       >
-//         <li>
-//           <a onClick={onModeClick}>Equally</a>
-//         </li>
-//         <li>
-//           <a onClick={onModeClick}>Unequally</a>
-//         </li>
-//       </ul>
-//     </div>
-//   );
-// };
-
 const calculateSharedExpenseContributions = (
-  numberOfParticipants: number,
+  numberOfUsers: number,
   expenseContributions: { userId: string; paid: number; actualShare: number }[],
   totalExpense: number
 ) => {
@@ -66,7 +38,7 @@ const calculateSharedExpenseContributions = (
     return {
       userId: expContri.userId,
       paid: expContri.paid,
-      actualShare: parseFloat((totalExpense / numberOfParticipants).toFixed(2)),
+      actualShare: parseFloat((totalExpense / numberOfUsers).toFixed(2)),
     };
   });
 };
@@ -74,7 +46,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   isOpen,
   handleExpenseCreation,
   onCancel,
-  participants,
+  members,
 }) => {
   if (!isOpen) {
     return null;
@@ -83,8 +55,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   const [expenseContributions, setExpenseContributions] = useState<
     { userId: string; paid: number; actualShare: number }[]
   >(
-    participants.map((participant) => ({
-      userId: participant.id,
+    members.map((member) => ({
+      userId: member.id,
       paid: 0.0,
       actualShare: 0.0,
     }))
@@ -126,15 +98,15 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       </div>
       <div className="text-lg">
         <p className="font-bold">Amount paid by: </p>
-        {participants.map((participant) => {
+        {members.map((member) => {
           const index = expenseContributions.findIndex(
             (expenseContribution) =>
-              expenseContribution.userId === participant.id
+              expenseContribution.userId === member.id
           );
           return (
-            <div key={participant.id} className="my-2 flex items-center">
-              <label htmlFor={`${participant.id}-amt-paid`} className="mr-2">
-                {participant.name}
+            <div key={member.id} className="my-2 flex items-center">
+              <label htmlFor={`${member.id}-amt-paid`} className="mr-2">
+                {member.name}
               </label>
               <input
                 onWheel={(e) => e.currentTarget.blur()}
@@ -168,7 +140,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     return t1;
                   });
                 }}
-                id={`${participant.id}-amt-paid`}
+                id={`${member.id}-amt-paid`}
                 className="input-group-sm input-primary input ml-auto"
               />
             </div>
@@ -214,20 +186,20 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         {!sharedEqually && (
           <>
             <h2 className="text-lg font-bold">
-              Enter the actual share of each participant
+              Enter the actual share of each member
             </h2>
-            {participants.map((participant) => {
+            {members.map((member) => {
               const index = expenseContributions.findIndex(
                 (expenseContribution) =>
-                  expenseContribution.userId === participant.id
+                  expenseContribution.userId === member.id
               );
               return (
-                <div key={participant.id} className="my-2 flex items-center">
+                <div key={member.id} className="my-2 flex items-center">
                   <label
-                    htmlFor={`${participant.id}-amt-paid`}
+                    htmlFor={`${member.id}-amt-paid`}
                     className="mr-2"
                   >
-                    {participant.name}
+                    {member.name}
                   </label>
                   <input
                     onWheel={(e) => e.currentTarget.blur()}
@@ -261,7 +233,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                         return t1;
                       });
                     }}
-                    id={`${participant.id}-amt-paid`}
+                    id={`${member.id}-amt-paid`}
                     className="input-group-sm input-primary input ml-auto"
                   />
                 </div>
@@ -278,7 +250,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               handleExpenseCreation(
                 expenseName,
                 calculateSharedExpenseContributions(
-                  participants.length,
+                  members.length,
                   expenseContributions,
                   totalExpense
                 ),

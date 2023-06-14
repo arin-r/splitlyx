@@ -75,7 +75,7 @@ model VerificationToken {
 model Group {
     id                 String              @id @default(cuid())
     name               String
-    participants       User[]
+    members       User[]
     createdAt          DateTime            @default(now())
     expenses           Expense[]
     groupContributions GroupContribution[]

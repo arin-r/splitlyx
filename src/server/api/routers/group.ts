@@ -5,7 +5,7 @@ export const groupRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        participants: z.string().array().nonempty(),
+        members: z.string().array().nonempty(),
         groupName: z.string(),
       })
     )
@@ -14,11 +14,11 @@ export const groupRouter = createTRPCRouter({
       if (userName === null || userName === undefined) {
         throw new Error("Unexpected Behaviour of ctx.session.user.name");
       }
-      input.participants.push(userName);
+      input.members.push(userName);
       const userIds = await ctx.prisma.user.findMany({
         where: {
           name: {
-            in: input.participants,
+            in: input.members,
           },
         },
         select: {
@@ -28,14 +28,14 @@ export const groupRouter = createTRPCRouter({
       const groupCreationResponse = await ctx.prisma.group.create({
         data: {
           name: input.groupName,
-          participants: {
+          members: {
             connect: userIds,
           },
         },
         select: {
           expenses: true,
           name: true,
-          participants: true,
+          members: true,
           groupContributions: true,
         },
       });

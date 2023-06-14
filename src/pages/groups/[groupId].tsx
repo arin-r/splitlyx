@@ -7,20 +7,11 @@ import { getSession } from "next-auth/react";
 import { prisma } from "~/server/db";
 import AddExpenseModal from "~/components/AddExpenseModal";
 import ExpenseDetailsModal from "~/components/ExpenseDetailsModal";
-
-type Group = {
-  name: string;
-  id: string;
-};
-
-type Participant = {
-  id: string;
-  name: string | null;
-};
+import RepaymentDetailsModal from "~/components/RepaymentDetailsModal";
 
 export const getServerSideProps: GetServerSideProps<{
   groups: Group[];
-  participants: Participant[];
+  members: Member[];
   groupId: string;
 }> = async (ctx) => {
   const session = await getSession(ctx);
@@ -33,7 +24,6 @@ export const getServerSideProps: GetServerSideProps<{
     };
   }
   const groupId = ctx.params?.groupId;
-
   if (Array.isArray(groupId) || !groupId) {
     throw new Error("Invalid Path");
   }
@@ -42,7 +32,7 @@ export const getServerSideProps: GetServerSideProps<{
       id: groupId,
     },
   });
-  const groupsOfUser = await prisma.user.findFirst({
+  const groupsOfMember = await prisma.user.findFirst({
     where: {
       name: session.user.name,
     },
@@ -56,7 +46,7 @@ export const getServerSideProps: GetServerSideProps<{
     },
   });
 
-  const participants = await prisma.user.findMany({
+  const members = await prisma.user.findMany({
     where: {
       groups: {
         some: {
@@ -73,26 +63,47 @@ export const getServerSideProps: GetServerSideProps<{
   return {
     props: {
       groups:
-        groupsOfUser?.groups.map((group) => ({
+        groupsOfMember?.groups.map((group) => ({
           name: group.name,
           id: group.id,
         })) || [],
-      participants: participants,
+      members: members,
       groupId: groupId,
     },
   };
 };
 
+/**
+ * TODO
+ * Optimisation: members and balances contain repeated data of user.id and user.name
+ *
+ * This leads to rather incovenient data which has to be handled now. For instance, while finding selectedMemberIndex
+ * I have to find the index in members array which has same userId as balance.user.id
+ *
+ * Solution
+ * 1. change API end points, and only make one request similar to "api.group.getMemberData"
+ *    which returns an object {id, name, balance} []
+ * 2. Another solution could be that I sort both members and balances array lexicographically based on
+ *    user.name which will make indexes for same user, the same
+ * 
+ * However I want to display a list of Group Members which should be server side rendered. Every time an expense is added/removed 
+ * the balances change, which will cause weird loading state issues in the "Group Members" list. 
+ */
 const dashboard = ({
   groups,
-  participants,
+  members,
   groupId,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showAddExpenseModal, setShowAddExpenseModal] =
     useState<boolean>(false);
   const [showExpenseDetailsModel, setShowExpenseDetailsModal] =
     useState<boolean>(false);
+  const [showMemberRepaymentDetailsModal, setShowMemberRepaymentDetailsModal] =
+    useState<boolean>(false);
+  const [selectedMemberIndex, setSelectedMemberIndex] = useState<number>(-1);
+
   const [selectedExpenseId, setSelectedExpenseId] = useState<string>("");
+
   const {
     data: expenses,
     refetch: refetchExpenses,
@@ -114,14 +125,14 @@ const dashboard = ({
   );
 
   const expenseCreator = api.expense.create.useMutation({
-    onSuccess(data, variables, context) {
+    onSuccess() {
       void refetchExpenses();
       void refetchBalances();
     },
   });
 
   const expenseDeletor = api.expense.delete.useMutation({
-    onSuccess(data, variables, context) {
+    onSuccess() {
       void refetchExpenses();
       void refetchBalances();
     },
@@ -135,7 +146,7 @@ const dashboard = ({
     <div>
       <div>
         <AddExpenseModal
-          participants={participants}
+          members={members}
           isOpen={showAddExpenseModal}
           message="Configure The expense"
           onCancel={() => {
@@ -160,6 +171,7 @@ const dashboard = ({
             expenseId={selectedExpenseId}
             onCancel={() => {
               setShowExpenseDetailsModal(false);
+              setSelectedMemberIndex(-1);
             }}
             onDelete={() => {
               expenseDeletor.mutate({
@@ -169,6 +181,16 @@ const dashboard = ({
               setShowExpenseDetailsModal(false);
               setSelectedExpenseId("");
             }}
+          />
+        )}
+        {showMemberRepaymentDetailsModal && (
+          <RepaymentDetailsModal
+            groupId={groupId}
+            onClose={() => {
+              setShowMemberRepaymentDetailsModal(false);
+            }}
+            //not change of naming convention. from "member" to "user"
+            user={members[selectedMemberIndex]!}
           />
         )}
       </div>
@@ -270,7 +292,15 @@ const dashboard = ({
                     return (
                       <li
                         key={idx}
-                        className="border-b-[1px] border-[#272d35] pb-2"
+                        className="border-b-[1px] border-[#272d35] pb-2 hover:cursor-pointer"
+                        onClick={() => {
+                          //This weird stuff is being done beacuse of the unoptimal data fetching described above.
+                          const idxInMembersArray = members.findIndex(
+                            (m) => m.id === balance.user.id
+                          );
+                          setSelectedMemberIndex(idxInMembersArray);
+                          setShowMemberRepaymentDetailsModal(true);
+                        }}
                       >
                         <div className="text-left">
                           <div className="text-lg font-bold">
@@ -291,6 +321,16 @@ const dashboard = ({
       </div>
     </div>
   );
+};
+
+type Group = {
+  name: string;
+  id: string;
+};
+
+type Member = {
+  id: string;
+  name: string | null;
 };
 
 export default dashboard;

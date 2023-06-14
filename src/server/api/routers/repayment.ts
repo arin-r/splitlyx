@@ -1,24 +1,45 @@
 import { z } from "zod";
 import {
-  createTRPCRouter,
-  protectedProcedure,
+  createTRPCRouter, protectedProcedure,
 } from "~/server/api/trpc";
-import { prisma } from "~/server/db";
 
 export const repaymentRouter = createTRPCRouter({
-  getAll: protectedProcedure
-    .input(z.object({ groupId: z.string() }))
-    .query(async ({ ctx, input }) => {
+  getSuggested: protectedProcedure.input(z.object({
+    groupId: z.string(),
+    userId: z.string(),
+  })).query(
+    async ({ ctx, input }) => {
       const repayments = await ctx.prisma.repayment.findMany({
         where: {
-          groupId: input.groupId,
+          OR: [
+            {
+              groupId: input.groupId,
+              payerId: input.userId,
+            },
+            {
+              groupId: input.groupId,
+              receiverId: input.userId,
+            }
+          ]
         },
         select: {
-          payer: { select: { id: true, name: true } },
-          receiver: { select: { id: true, name: true } },
+          payer: {
+            select: {
+              name: true,
+              id: true,
+            }
+          },
+          receiver: {
+            select: {
+              name: true, 
+              id: true,
+            }
+          },
           repaymentAmount: true,
-        },
+        }
       });
+
       return repayments;
-    }),
+    }
+  )
 });
