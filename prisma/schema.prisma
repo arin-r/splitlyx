@@ -60,8 +60,10 @@ model User {
     groups               Group[]
     expenseContributions ExpenseContribution[]
     groupContributions   GroupContribution[]
-    payer                Repayment[]         @relation("payingUser")
-    receiver             Repayment[]         @relation("receivingUser")
+    repaymentPayer       Repayment[]           @relation("repayment_payingUser")
+    repaymentReceiver    Repayment[]           @relation("repayment_receivingUser")
+    transactionPayer     RecordedTransaction[] @relation("transaction_payingUser")
+    transactionReceiver  RecordedTransaction[] @relation("transaction_receivingUser")
 }
 
 model VerificationToken {
@@ -73,13 +75,14 @@ model VerificationToken {
 }
 
 model Group {
-    id                 String              @id @default(cuid())
-    name               String
-    members       User[]
-    createdAt          DateTime            @default(now())
-    expenses           Expense[]
-    groupContributions GroupContribution[]
-    repayments Repayment[]
+    id                   String                @id @default(cuid())
+    name                 String
+    members              User[]
+    createdAt            DateTime              @default(now())
+    expenses             Expense[]
+    groupContributions   GroupContribution[]
+    repayments           Repayment[]
+    recordedTransactions RecordedTransaction[]
 }
 
 model Expense {
@@ -111,13 +114,26 @@ model GroupContribution {
     groupId     String
 }
 
+// Repayment is a model to store suggested repayments which minimize the number of transactions
+// RecordedTransaction is a model to store all recorded transactions which occur between members of a group
 model Repayment {
-    id                String  @id @default(cuid())
+    id              String @id @default(cuid())
+    payerId         String
+    receiverId      String
+    payer           User   @relation("repayment_payingUser", fields: [payerId], references: [id])
+    receiver        User   @relation("repayment_receivingUser", fields: [receiverId], references: [id])
+    repaymentAmount Float
+    group           Group  @relation(fields: [groupId], references: [id])
+    groupId         String
+}
+
+model RecordedTransaction {
+    id                String @id @default(cuid())
     payerId           String
     receiverId        String
-    payer             User    @relation("payingUser", fields: [payerId], references: [id])
-    receiver          User    @relation("receivingUser", fields: [receiverId], references: [id])
-    repaymentAmount Float
-    group             Group   @relation(fields: [groupId], references: [id])
+    payer             User   @relation("transaction_payingUser", fields: [payerId], references: [id])
+    receiver          User   @relation("transaction_receivingUser", fields: [receiverId], references: [id])
+    transactionAmount Float
+    group             Group  @relation(fields: [groupId], references: [id])
     groupId           String
 }

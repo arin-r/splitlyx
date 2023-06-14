@@ -35,7 +35,7 @@ const Home: NextPage = () => {
               className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
               onClick={() => {
                 groupCreater.mutate({
-                  members: ["Cent", "mindful-sailor", "Serene"],
+                  members: ["centelle", "mindful-sailor", "Serene"],
                   groupName: "First group",
                 });
               }}
