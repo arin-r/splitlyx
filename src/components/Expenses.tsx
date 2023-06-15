@@ -4,7 +4,7 @@ import ExpenseDetailsModal from "./ExpenseDetailsModal";
 
 interface ExpensesProps {
   groupId: string;
-  updateExpensesAndBalances: () => void;
+  updateStuff: () => void;
   expenses:
     | {
         id: string;
@@ -18,14 +18,14 @@ interface ExpensesProps {
 
 const Expenses: FC<ExpensesProps> = ({
   groupId,
-  updateExpensesAndBalances,
+  updateStuff,
   expenses,
   expensesIsLoading,
   expensesIsRefetching,
 }) => {
   const expenseDeletor = api.expense.delete.useMutation({
     onSuccess() {
-      updateExpensesAndBalances();
+      updateStuff();
     },
   });
 

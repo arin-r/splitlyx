@@ -1,4 +1,5 @@
 import { z } from "zod";
+import calculateTransactions from "~/lib/calculateTransactions";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const groupRouter = createTRPCRouter({
@@ -168,6 +169,102 @@ export const groupRouter = createTRPCRouter({
           groupId: input.groupId,
         },
       });
+    }),
+
+  addTransaction: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+        payerId: z.string(),
+        receiverId: z.string(),
+        transactionAmount: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const transactionCreationResponse =
+        await ctx.prisma.recordedTransaction.create({
+          data: {
+            transactionAmount: input.transactionAmount,
+            groupId: input.groupId,
+            payerId: input.payerId,
+            receiverId: input.receiverId,
+          },
+        });
+
+      let groupContributions = await ctx.prisma.groupContribution.findMany({
+        where: {
+          groupId: input.groupId,
+        },
+        select: {
+          actualShare: true,
+          groupId: true,
+          paid: true,
+          userId: true,
+        },
+      });
+
+      await ctx.prisma.groupContribution.deleteMany({
+        where: {
+          groupId: input.groupId,
+        },
+      });
+
+      const payerIndex = groupContributions.findIndex(
+        (gp) => gp.userId === input.payerId
+      );
+      console.log("🚀 ~ file: group.ts ~ .mutation ~ payerIndex:", payerIndex);
+
+      const receiverIndex = groupContributions.findIndex(
+        (gp) => gp.userId === input.receiverId
+      );
+      console.log(
+        "🚀 ~ file: group.ts ~ .mutation ~ receiverIndex:",
+        receiverIndex
+      );
+
+      //TODO: error handling if payerIndex of receiverIndex is -1
+
+      groupContributions[payerIndex]!.paid += input.transactionAmount;
+      groupContributions[receiverIndex]!.paid -= input.transactionAmount;
+
+      await ctx.prisma.groupContribution.createMany({
+        data: groupContributions,
+      });
+
+      const repayments = calculateTransactions(
+        structuredClone(groupContributions),
+        input.groupId
+      );
+      await ctx.prisma.repayment.deleteMany({
+        where: {
+          groupId: input.groupId,
+        },
+      });
+
+      await ctx.prisma.repayment.createMany({
+        data: repayments,
+      });
+    }),
+
+  getTransactions: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const transactions = await ctx.prisma.recordedTransaction.findMany({
+        where: {
+          groupId: input.groupId,
+        },
+        select: {
+          payerId: true,
+          receiverId: true,
+          transactionAmount: true,
+        },
+      });
+
+      return transactions;
     }),
   //dev only
   deleteAll: protectedProcedure.mutation(async ({ ctx, input }) => {

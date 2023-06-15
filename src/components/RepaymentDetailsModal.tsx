@@ -1,28 +1,45 @@
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useState } from "react";
 import { api } from "~/utils/api";
+import AddTransactionModal from "./AddTransactionModal";
+import useGroupStore from "~/store/useGroupStore";
 
 interface RepaymentDetailsModalProps {
-  groupId: string;
   user: { id: string; name: string | null };
   onClose: () => void;
+  updateBalances: () => void;
+  updateTransactions: () => void;
 }
 
 const RepaymentDetailsModal: FC<RepaymentDetailsModalProps> = ({
   user,
-  groupId,
   onClose,
+  updateBalances,
+  updateTransactions,
 }) => {
-  const { data: repaymentData, isLoading: repaymentIsLoading } =
-    api.repayment.getSuggested.useQuery(
-      {
-        groupId: groupId,
-        userId: user.id,
-      },
-      {
-        refetchOnWindowFocus: false,
-      }
-    );
+  const groupId = useGroupStore((state) => state.groupId);
+  const {
+    data: repaymentData,
+    isLoading: repaymentIsLoading,
+    refetch: refetchRepayment,
+  } = api.repayment.getSuggested.useQuery(
+    {
+      groupId: groupId,
+      userId: user.id,
+    },
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
+  const [showAddTransactionModal, setShowAddTrasactionModal] =
+    useState<boolean>(false);
+  const [transactionData, setTransactionData] = useState<null | {
+    receiverId: string;
+    payerName: string | null;
+    payerId: string;
+    receiverName: string | null;
+    amount: number;
+  }>(null);
   if (repaymentIsLoading) {
     return (
       <BaseLayout>
@@ -35,39 +52,66 @@ const RepaymentDetailsModal: FC<RepaymentDetailsModalProps> = ({
 
   return (
     <BaseLayout>
+      {showAddTransactionModal && transactionData !== null && (
+        <AddTransactionModal
+          defaultAmount={transactionData.amount}
+          onCancel={() => {
+            setShowAddTrasactionModal(false);
+            setTransactionData(null);
+          }}
+          payerId={transactionData.payerId}
+          receiverId={transactionData.receiverId}
+          onTransactionCreationSuccess={() => {
+            setShowAddTrasactionModal(false);
+            void updateBalances();
+            void updateTransactions();
+            void refetchRepayment();
+          }}
+        />
+      )}
       <div>
-        <div>
-          <h1 className="text-2xl font-bold">{user.name}</h1>
-          <h2 className="mt-4 text-xl uppercase">Suggested Repayments:</h2>
-          {repaymentData && (
-            <ul className="px-4">
-              {repaymentData.map((rp, idx) => {
-                return (
-                  <li key={idx} className="my-6 list-disc text-lg">
-                    <div className="flex justify-between">
-                      <div>
-                        {`${rp.payer.name} owes $${rp.repaymentAmount} to ${rp.receiver.name}`}
-                      </div>
-                      <div>
-                        <button className="btn-primary btn-sm btn">
-                          Settle
-                        </button>
-                      </div>
+        <h1 className="text-2xl font-bold">{user.name}</h1>
+        <h2 className="mt-4 text-xl uppercase">Suggested Repayments:</h2>
+        {repaymentData && (
+          <ul className="px-4">
+            {repaymentData.map((rp, idx) => {
+              return (
+                <li key={idx} className="my-6 list-disc text-lg">
+                  <div className="flex justify-between">
+                    <div>
+                      {`${rp.payer.name} owes $${rp.repaymentAmount} to ${rp.receiver.name}`}
                     </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-        <div className="flex justify-end">
-          <button
-            className="btn-primary btn-outline btn-sm btn"
-            onClick={onClose}
-          >
-            Close
-          </button>
-        </div>
+                    <div>
+                      <button
+                        className="btn-primary btn-sm btn"
+                        onClick={() => {
+                          setTransactionData({
+                            amount: rp.repaymentAmount,
+                            payerId: rp.payer.id,
+                            receiverId: rp.receiver.id,
+                            payerName: rp.payer.name,
+                            receiverName: rp.receiver.name,
+                          });
+                          setShowAddTrasactionModal(true);
+                        }}
+                      >
+                        Settle
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+      <div className="flex justify-end">
+        <button
+          className="btn-primary btn-outline btn-sm btn"
+          onClick={onClose}
+        >
+          Close
+        </button>
       </div>
     </BaseLayout>
   );

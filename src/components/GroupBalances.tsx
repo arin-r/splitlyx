@@ -1,9 +1,8 @@
 import { FC, useState } from "react";
 import RepaymentDetailsModal from "./RepaymentDetailsModal";
+import useGroupStore from "~/store/useGroupStore";
 
 interface GroupBalancesProps {
-  groupId: string;
-  members: Member[];
   balances:
     | {
         user: {
@@ -15,30 +14,36 @@ interface GroupBalancesProps {
     | undefined;
   balancesIsLoading: boolean;
   balancesIsRefetching: boolean;
+  updateBalances: () => void;
+  updateTransactions: () => void;
 }
 
 const GroupBalances: FC<GroupBalancesProps> = ({
-  groupId,
-  members,
   balances,
   balancesIsLoading,
   balancesIsRefetching,
+  updateBalances,
+  updateTransactions,
 }) => {
   const [showMemberRepaymentDetailsModal, setShowMemberRepaymentDetailsModal] =
     useState<boolean>(false);
   const [selectedMemberIndex, setSelectedMemberIndex] = useState<number>(-1);
 
+  const members = useGroupStore((state) => state.members);
+  const groupId = useGroupStore((state) => state.groupId);
   return (
     <>
       {showMemberRepaymentDetailsModal && (
         <RepaymentDetailsModal
-          groupId={groupId}
           onClose={() => {
             setShowMemberRepaymentDetailsModal(false);
             setSelectedMemberIndex(-1);
           }}
           //not change of naming convention. from "member" to "user"
           user={members[selectedMemberIndex]!}
+          updateBalances={updateBalances}
+          updateTransactions={updateTransactions}
+          // setShowMemberRepaymentDetailsModal={setShowMemberRepaymentDetailsModal}
         />
       )}
       <div className="mt-16 pl-4">

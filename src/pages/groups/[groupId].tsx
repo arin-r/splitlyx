@@ -10,6 +10,8 @@ import Expenses from "~/components/Expenses";
 import TabSelector from "~/components/TabSelector";
 import GroupBalances from "~/components/GroupBalances";
 import Sidebar from "~/components/Sidebar";
+import useGroupStore from "~/store/useGroupStore";
+import Transactions from "~/components/Transactions";
 
 export const getServerSideProps: GetServerSideProps<{
   groups: Group[];
@@ -100,6 +102,11 @@ const groupsPage = ({
     useState<boolean>(false);
   const [activeTab, setActiveTab] = useState("expenses");
 
+  const setGroupId = useGroupStore((state) => state.setGroupId);
+  setGroupId(groupId);
+
+  const setMembers = useGroupStore((state) => state.setMembers);
+  setMembers(members);
   /**
    * Why useQuery hook is used outside the component:
    *  Because I need the refetchBalances and refetchExpenses function in two places.
@@ -108,7 +115,7 @@ const groupsPage = ({
    */
   const expensesQuery = api.group.getAllExpenses.useQuery(
     { groupId: groupId },
-    { refetchOnWindowFocus: false }
+    { enabled: activeTab === "expenses", refetchOnWindowFocus: false }
   );
 
   const balancesQuery = api.group.getGroupBalances.useQuery(
@@ -116,9 +123,14 @@ const groupsPage = ({
     { refetchOnWindowFocus: false }
   );
 
+  const transactionsQuery = api.group.getTransactions.useQuery(
+    { groupId: groupId },
+    { enabled: activeTab === "transactions", refetchOnWindowFocus: false }
+  );
+
   const expenseCreator = api.expense.create.useMutation({
     onSuccess() {
-      updateExpensesAndBalances();
+      updateStuff();
     },
   });
 
@@ -126,10 +138,27 @@ const groupsPage = ({
     setActiveTab(tab);
   };
 
-  const updateExpensesAndBalances = () => {
-    void expensesQuery.refetch();
+  const updateExpenses = () => {
+    if (activeTab === "expenses") {
+      void expensesQuery.refetch();
+    }
+  };
+
+  const updateBalances = () => {
     void balancesQuery.refetch();
   };
+
+  const updateTransactions = () => {
+    if (activeTab === "transactions") {
+      void transactionsQuery.refetch();
+    }
+  };
+  const updateStuff = () => {
+    updateExpenses();
+    updateBalances();
+    updateTransactions();
+  };
+
   return (
     <div>
       <div>
@@ -174,9 +203,11 @@ const groupsPage = ({
                       setShowAddExpenseModal(true);
                     }}
                   >
-                    Add an Expense
+                    Add Expense
                   </button>
-                  <button className="btn-primary btn px-2 ">Settle up</button>
+                  <button className="btn-primary btn px-2 ">
+                    Add transaction
+                  </button>
                 </div>
               </div>
             </div>
@@ -184,21 +215,30 @@ const groupsPage = ({
               activeTab={activeTab}
               handleTabClick={handleTabClick}
             />
-            <Expenses
-              expenses={expensesQuery.data}
-              expensesIsLoading={expensesQuery.isLoading}
-              expensesIsRefetching={expensesQuery.isRefetching}
-              updateExpensesAndBalances={updateExpensesAndBalances}
-              groupId={groupId}
-            />
+            {activeTab === "expenses" && (
+              <Expenses
+                expenses={expensesQuery.data}
+                expensesIsLoading={expensesQuery.isLoading}
+                expensesIsRefetching={expensesQuery.isRefetching}
+                updateStuff={updateStuff}
+                groupId={groupId}
+              />
+            )}
+            {activeTab === "transactions" && (
+              <Transactions
+                transactions={transactionsQuery.data}
+                transactionsIsLoading={transactionsQuery.isLoading}
+                transactionsIsRefetching={transactionsQuery.isRefetching}
+              />
+            )}
           </div>
           <div className="col-span-2">
             <GroupBalances
               balances={balancesQuery.data}
               balancesIsLoading={balancesQuery.isLoading}
               balancesIsRefetching={balancesQuery.isRefetching}
-              groupId={groupId}
-              members={members}
+              updateBalances={updateBalances}
+              updateTransactions={updateTransactions}
             />
           </div>
         </div>
