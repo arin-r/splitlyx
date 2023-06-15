@@ -1,7 +1,6 @@
 import React, { FC, ReactNode, useRef, useState } from "react";
 
 interface ConfirmationModalProps {
-  isOpen: boolean;
   message: string;
   members: { id: string; name: string | null }[];
   handleExpenseCreation: (
@@ -43,14 +42,10 @@ const calculateSharedExpenseContributions = (
   });
 };
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
-  isOpen,
   handleExpenseCreation,
   onCancel,
   members,
 }) => {
-  if (!isOpen) {
-    return null;
-  }
   const [sharedEqually, setSharedEqually] = useState<boolean>(true);
   const [expenseContributions, setExpenseContributions] = useState<
     { userId: string; paid: number; actualShare: number }[]
@@ -100,8 +95,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <p className="font-bold">Amount paid by: </p>
         {members.map((member) => {
           const index = expenseContributions.findIndex(
-            (expenseContribution) =>
-              expenseContribution.userId === member.id
+            (expenseContribution) => expenseContribution.userId === member.id
           );
           return (
             <div key={member.id} className="my-2 flex items-center">
@@ -195,10 +189,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               );
               return (
                 <div key={member.id} className="my-2 flex items-center">
-                  <label
-                    htmlFor={`${member.id}-amt-paid`}
-                    className="mr-2"
-                  >
+                  <label htmlFor={`${member.id}-amt-paid`} className="mr-2">
                     {member.name}
                   </label>
                   <input

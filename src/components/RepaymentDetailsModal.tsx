@@ -1,5 +1,4 @@
 import { FC, ReactNode } from "react";
-import { expenseRouter } from "~/server/api/routers/expense";
 import { api } from "~/utils/api";
 
 interface RepaymentDetailsModalProps {
