@@ -29,20 +29,32 @@ const Transactions: FC<TransactionsProps> = ({
           <progress className="progress w-56"></progress>
         </div>
       )}
-      {transactions &&
-        transactions.map((t, idx) => {
-          const payerIndex = members.findIndex((m) => m.id === t.payerId);
-          const payerName = members[payerIndex]?.name!;
-          const receiverIndex = members.findIndex((m) => m.id === t.receiverId);
-          const receiverName = members[receiverIndex]?.name!;
-          return (
-            <div key={idx}>
-              <p>
-                {payerName} paid {receiverName} ${t.transactionAmount}
-              </p>
-            </div>
-          );
-        })}
+      {transactions && (
+        <ul className="mx-2">
+          {transactions.map((t, idx) => {
+            const payerIndex = members.findIndex((m) => m.id === t.payerId);
+            const payerName = members[payerIndex]?.name!;
+            const receiverIndex = members.findIndex(
+              (m) => m.id === t.receiverId
+            );
+            const receiverName = members[receiverIndex]?.name!;
+            return (
+              <li className="mb-2 hover:cursor-pointer">
+                <div className="rounded-md bg-neutral-focus p-4 shadow-md">
+                  <div className="flex justify-between">
+                    <p>
+                      <span className="font-bold">{payerName}</span>
+                      <span> paid </span>
+                      <span className="font-bold">{receiverName}</span>
+                    </p>
+                    <p className="font-bold">${t.transactionAmount}</p>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 };
