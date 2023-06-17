@@ -36,7 +36,7 @@ export const getServerSideProps: GetServerSideProps<{
       id: groupId,
     },
   });
-  const groupsOfMember = await prisma.user.findFirst({
+  const groupsOfUser = await prisma.user.findFirst({
     where: {
       name: session.user.name,
     },
@@ -67,7 +67,7 @@ export const getServerSideProps: GetServerSideProps<{
   return {
     props: {
       groups:
-        groupsOfMember?.groups.map((group) => ({
+        groupsOfUser?.groups.map((group) => ({
           name: group.name,
           id: group.id,
         })) || [],
@@ -102,6 +102,7 @@ const groupsPage = ({
     useState<boolean>(false);
   const [activeTab, setActiveTab] = useState("expenses");
 
+  const groupName = groups[groups.findIndex((g) => g.id === groupId)]!.name;
   const setGroupId = useGroupStore((state) => state.setGroupId);
   setGroupId(groupId);
 
@@ -195,7 +196,9 @@ const groupsPage = ({
           <div className="col-span-4 border-r-[1px] border-[#272d35] p-0">
             <div className="mx-auto mt-8 w-max">
               <div className="flex items-center justify-between px-6 py-4">
-                <div className="mr-20 text-3xl font-bold">Hong Kong</div>
+                <div className="mr-20 min-w-[13rem] text-3xl font-bold">
+                  {groupName}
+                </div>
                 <div>
                   <button
                     className="btn-primary btn mr-2 px-2"
@@ -239,6 +242,7 @@ const groupsPage = ({
               balancesIsRefetching={balancesQuery.isRefetching}
               updateBalances={updateBalances}
               updateTransactions={updateTransactions}
+              members={members}
             />
           </div>
         </div>

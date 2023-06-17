@@ -6,7 +6,8 @@ export const groupRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        members: z.string().array().nonempty(),
+        //add check for non empty members list
+        members: z.string().array(),
         groupName: z.string(),
       })
     )
@@ -34,12 +35,17 @@ export const groupRouter = createTRPCRouter({
           },
         },
         select: {
-          expenses: true,
-          name: true,
-          members: true,
-          groupContributions: true,
+          id: true,
+          // expenses: true,
+          // name: true,
+          // members: true,
+          // groupContributions: true,
         },
       });
+
+      return {
+        groupId: groupCreationResponse.id,
+      };
     }),
 
   getAll: protectedProcedure.query(({ ctx, input }) => {

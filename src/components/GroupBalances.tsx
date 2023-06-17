@@ -16,6 +16,7 @@ interface GroupBalancesProps {
   balancesIsRefetching: boolean;
   updateBalances: () => void;
   updateTransactions: () => void;
+  members: Member[];
 }
 
 const GroupBalances: FC<GroupBalancesProps> = ({
@@ -24,13 +25,14 @@ const GroupBalances: FC<GroupBalancesProps> = ({
   balancesIsRefetching,
   updateBalances,
   updateTransactions,
+  //encountered an error if I used useGroupStore(state => state.members);
+  //hence I had to pass it as a prop
+  members,
 }) => {
   const [showMemberRepaymentDetailsModal, setShowMemberRepaymentDetailsModal] =
     useState<boolean>(false);
   const [selectedMemberIndex, setSelectedMemberIndex] = useState<number>(-1);
 
-  const members = useGroupStore((state) => state.members);
-  const groupId = useGroupStore((state) => state.groupId);
   return (
     <>
       {showMemberRepaymentDetailsModal && (

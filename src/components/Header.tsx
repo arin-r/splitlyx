@@ -1,11 +1,18 @@
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 export const Header = () => {
   const { data: sessionData } = useSession();
 
+  const router = useRouter();
   return (
     <div className="navbar bg-primary text-primary-content">
-      <div className="flex-1 pl-5 text-3xl font-bold">
+      <div
+        className="flex-1 pl-5 text-3xl font-bold hover:cursor-pointer"
+        onClick={() => {
+          router.push("/home");
+        }}
+      >
         {/* {sessionData?.user?.name ? `Notes for ${sessionData.user.name}` : ""} */}
         Sp<span className="text-[hsl(280,100%,70%)]">lit</span>wise
       </div>

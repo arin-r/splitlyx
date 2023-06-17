@@ -39,9 +39,7 @@ const Transactions: FC<TransactionsProps> = ({
             );
             const receiverName = members[receiverIndex]?.name!;
             return (
-              <li 
-              key={idx}
-              className="mb-2 hover:cursor-pointer">
+              <li key={idx} className="mb-2 hover:cursor-pointer">
                 <div className="rounded-md bg-neutral-focus p-4 shadow-md">
                   <div className="flex justify-between">
                     <p>
