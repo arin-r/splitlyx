@@ -42,7 +42,7 @@ const Home: NextPage = () => {
               </button>
               {sessionData && (
                 <Link
-                  href="/home" 
+                  href="/home"
                   className="block rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
                 >
                   Home Page

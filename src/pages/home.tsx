@@ -54,7 +54,7 @@ export default function Page({
       <div className="flex justify-center">
         <div className="w-3/4">
           <div className="mt-1 flex">
-            <div className="mt-[3rem] mr-4 w-1/4">
+            <div className="mr-4 mt-[3rem] w-1/4">
               <div className="mb-3 flex justify-between">
                 <div className="text-xl">Groups</div>
                 <div className="rounded-md px-2 hover:cursor-pointer hover:bg-neutral-focus">
@@ -68,7 +68,7 @@ export default function Page({
                   groups.map((group) => (
                     <Link
                       key={group.id}
-                      className="block box-content rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus"
+                      className="box-content block rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus"
                       href={`/groups/${group.id}`}
                     >
                       - {group.name}

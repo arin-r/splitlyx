@@ -59,8 +59,8 @@ const RepaymentDetailsModal: FC<RepaymentDetailsModalProps> = ({
             setShowAddTrasactionModal(false);
             setTransactionData(null);
           }}
-          payerId={transactionData.payerId}
-          receiverId={transactionData.receiverId}
+          initialPayerId={transactionData.payerId}
+          initialReceiverId={transactionData.receiverId}
           onTransactionCreationSuccess={() => {
             setShowAddTrasactionModal(false);
             void updateBalances();

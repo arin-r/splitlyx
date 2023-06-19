@@ -32,7 +32,7 @@ const Sidebar: FC<SidebarProps> = ({ groups }) => {
             groups.map((group) => (
               <Link
                 key={group.id}
-                className={`block box-content rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus ${
+                className={`box-content block rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus ${
                   group.id === curGroupId && "bg-neutral-focus"
                 }`}
                 href={`/groups/${group.id}`}

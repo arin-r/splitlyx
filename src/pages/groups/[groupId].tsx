@@ -5,13 +5,14 @@ import { api } from "~/utils/api";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
 import { prisma } from "~/server/db";
-import AddExpenseModal from "~/components/Modals/AddExpenseModal";
+import AddExpenseModal from "~/components/modals/AddExpenseModal";
 import Expenses from "~/components/Expenses";
 import TabSelector from "~/components/TabSelector";
 import GroupBalances from "~/components/GroupBalances";
 import Sidebar from "~/components/Sidebar";
 import useGroupStore from "~/store/useGroupStore";
 import Transactions from "~/components/Transactions";
+import AddTransactionModal from "~/components/modals/AddTransactionModal";
 
 export const getServerSideProps: GetServerSideProps<{
   groups: Group[];
@@ -100,6 +101,8 @@ const groupsPage = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showAddExpenseModal, setShowAddExpenseModal] =
     useState<boolean>(false);
+  const [showAddTransactionModal, setShowAddTransactionModal] =
+    useState<boolean>(false);
   const [activeTab, setActiveTab] = useState("expenses");
 
   const groupName = groups[groups.findIndex((g) => g.id === groupId)]!.name;
@@ -185,6 +188,9 @@ const groupsPage = ({
             }}
           />
         )}
+        {/* {showAddTransactionModal && (
+          // <AddTransactionModal defaultAmount={0}/>
+        )} */}
       </div>
       <Header />
 
@@ -208,7 +214,12 @@ const groupsPage = ({
                   >
                     Add Expense
                   </button>
-                  <button className="btn-primary btn px-2 ">
+                  <button
+                    onClick={() => {
+                      setShowAddTransactionModal(true);
+                    }}
+                    className="btn-primary btn px-2 "
+                  >
                     Add transaction
                   </button>
                 </div>
