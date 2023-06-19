@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import arrayHasDuplicates from "~/lib/arrayHasDuplicate";
 import calculateTransactions from "~/lib/calculateTransactions";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
@@ -16,6 +17,19 @@ export const groupRouter = createTRPCRouter({
       const userName = ctx.session.user.name;
       if (userName === null || userName === undefined) {
         throw new Error("Unexpected Behaviour of ctx.session.user.name");
+      }
+      if (input.members.length <= 1 || arrayHasDuplicates(input.members)) {
+        throw new TRPCError({
+          code: "UNPROCESSABLE_CONTENT",
+          message:
+            "ALl members should be unique and atleast two members should be present",
+        });
+      }
+      if (input.groupName.trim().length === 0) {
+        throw new TRPCError({
+          code: "UNPROCESSABLE_CONTENT",
+          message: "Group Name should be non empty",
+        });
       }
       input.members.push(userName);
       const userIds = await ctx.prisma.user.findMany({
@@ -188,8 +202,8 @@ export const groupRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if(input.payerId === input.receiverId) {
-            throw new TRPCError({ code: "UNPROCESSABLE_CONTENT" });
+      if (input.payerId === input.receiverId) {
+        throw new TRPCError({ code: "UNPROCESSABLE_CONTENT" });
       }
       const transactionCreationResponse =
         await ctx.prisma.recordedTransaction.create({

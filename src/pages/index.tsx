@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
-
   const { data: sessionData } = useSession();
   return (
     <>

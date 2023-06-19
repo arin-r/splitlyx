@@ -188,9 +188,19 @@ const groupsPage = ({
             }}
           />
         )}
-        {/* {showAddTransactionModal && (
-          // <AddTransactionModal defaultAmount={0}/>
-        )} */}
+        {showAddTransactionModal && (
+          <AddTransactionModal
+            defaultAmount={0}
+            initialPayerId={members[0]?.id!}
+            initialReceiverId={members[1]?.id!}
+            onCancel={() => {
+              setShowAddTransactionModal(false);
+            }}
+            onTransactionCreationSuccess={() => {
+              setActiveTab("transactions");
+            }}
+          />
+        )}
       </div>
       <Header />
 
