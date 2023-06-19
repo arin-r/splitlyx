@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import RepaymentDetailsModal from "./RepaymentDetailsModal";
+import RepaymentDetailsModal from "./modals/RepaymentDetailsModal";
 import useGroupStore from "~/store/useGroupStore";
 
 interface GroupBalancesProps {

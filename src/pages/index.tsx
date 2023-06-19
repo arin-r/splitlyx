@@ -1,4 +1,3 @@
-import { router } from "@trpc/server";
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
@@ -13,10 +12,7 @@ const Home: NextPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  const groupCreater = api.group.create.useMutation();
-  const groupDeleter = api.group.deleteAll.useMutation();
   const { data: sessionData } = useSession();
-  const router = useRouter();
   return (
     <>
       <Head>
@@ -45,14 +41,12 @@ const Home: NextPage = () => {
                 {sessionData ? "Sign out" : "Sign in"}
               </button>
               {sessionData && (
-                <button
-                  onClick={() => {
-                    router.push("/home");
-                  }}
-                  className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+                <Link
+                  href="/home" 
+                  className="block rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
                 >
                   Home Page
-                </button>
+                </Link>
               )}
             </div>
           </div>

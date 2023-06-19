@@ -1,21 +1,18 @@
 import { signIn, signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 export const Header = () => {
   const { data: sessionData } = useSession();
 
-  const router = useRouter();
   return (
     <div className="navbar bg-primary text-primary-content">
-      <div
-        className="flex-1 pl-5 text-3xl font-bold hover:cursor-pointer"
-        onClick={() => {
-          router.push("/home");
-        }}
+      <Link
+        className="block flex-1 pl-5 text-3xl font-bold hover:cursor-pointer"
+        href="/home"
       >
-        {/* {sessionData?.user?.name ? `Notes for ${sessionData.user.name}` : ""} */}
         Sp<span className="text-[hsl(280,100%,70%)]">lit</span>wise
-      </div>
+      </Link>
       <div className="flex-none gap-2">
         <div className="dropdown-end dropdown">
           {sessionData?.user ? (

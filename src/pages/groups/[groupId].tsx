@@ -5,7 +5,7 @@ import { api } from "~/utils/api";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
 import { prisma } from "~/server/db";
-import AddExpenseModal from "~/components/AddExpenseModal";
+import AddExpenseModal from "~/components/Modals/AddExpenseModal";
 import Expenses from "~/components/Expenses";
 import TabSelector from "~/components/TabSelector";
 import GroupBalances from "~/components/GroupBalances";

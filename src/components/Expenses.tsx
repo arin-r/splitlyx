@@ -1,6 +1,6 @@
 import { FC, useState } from "react";
 import { api } from "~/utils/api";
-import ExpenseDetailsModal from "./ExpenseDetailsModal";
+import ExpenseDetailsModal from "./modals/ExpenseDetailsModal";
 
 interface ExpensesProps {
   groupId: string;

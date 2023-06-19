@@ -30,18 +30,15 @@ const Sidebar: FC<SidebarProps> = ({ groups }) => {
             <li>No groups</li>
           ) : (
             groups.map((group) => (
-              <li
+              <Link
                 key={group.id}
-                className={`box-content rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus ${
+                className={`block box-content rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus ${
                   group.id === curGroupId && "bg-neutral-focus"
                 }`}
-                onClick={() => {
-                  router.push(`/groups/${group.id}`);
-                }}
+                href={`/groups/${group.id}`}
               >
-                {/* <Link href={`/groups/${group.id}`}>- {group.name}</Link> */}
                 - {group.name}
-              </li>
+              </Link>
             ))
           )}
         </ul>

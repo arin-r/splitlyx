@@ -48,14 +48,13 @@ export default function Page({
   groups,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   //This may be suboptimal as compared to using Link component, but I had styling issues with that, hence I'm using this approach for now
-  const router = useRouter();
   return (
     <div>
       <Header />
       <div className="flex justify-center">
         <div className="w-3/4">
-          <div className="mt-6 flex">
-            <div className="mr-4 w-1/4">
+          <div className="mt-1 flex">
+            <div className="mt-[3rem] mr-4 w-1/4">
               <div className="mb-3 flex justify-between">
                 <div className="text-xl">Groups</div>
                 <div className="rounded-md px-2 hover:cursor-pointer hover:bg-neutral-focus">
@@ -67,16 +66,13 @@ export default function Page({
                   <li>No groups</li>
                 ) : (
                   groups.map((group) => (
-                    <li
+                    <Link
                       key={group.id}
-                      className="box-content rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus"
-                      onClick={() => {
-                        router.push(`/groups/${group.id}`);
-                      }}
+                      className="block box-content rounded-md px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus"
+                      href={`/groups/${group.id}`}
                     >
-                      {/* <Link href={`/groups/${group.id}`}>- {group.name}</Link> */}
                       - {group.name}
-                    </li>
+                    </Link>
                   ))
                 )}
               </ul>
