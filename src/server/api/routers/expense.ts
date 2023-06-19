@@ -37,14 +37,14 @@ export const expenseRouter = createTRPCRouter({
         )
       ) {
         throw new TRPCError({
-          code: "CONFLICT",
+          code: "UNPROCESSABLE_CONTENT",
           message:
             "The total amount paid should equal the total value of actualShares which should also be equal to totalExpense. One or many of these conditions have failed.",
         });
       }
       if (areFloatsEqual(input.totalExpense, 0.0)) {
         throw new TRPCError({
-          code: "CONFLICT",
+          code: "UNPROCESSABLE_CONTENT",
           message: "Total Expense should be greater than 0",
         });
       }

@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import calculateTransactions from "~/lib/calculateTransactions";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -187,6 +188,9 @@ export const groupRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      if(input.payerId === input.receiverId) {
+            throw new TRPCError({ code: "UNPROCESSABLE_CONTENT" });
+      }
       const transactionCreationResponse =
         await ctx.prisma.recordedTransaction.create({
           data: {
