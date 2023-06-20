@@ -264,10 +264,10 @@ export const groupRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       /**
        * Why is cascade not working?
-       * If I only have grp.delete I get the following error 
-       * Foreign key constraint failed on the field: `Expense_groupId_fkey (index)` 
-       * 
-       * Interestingly, cascade works for the expense model. When an expense is deleted, 
+       * If I only have grp.delete I get the following error
+       * Foreign key constraint failed on the field: `Expense_groupId_fkey (index)`
+       *
+       * Interestingly, cascade works for the expense model. When an expense is deleted,
        * all expense contributions are automatically deleted (as expected, and desired)
        */
       await ctx.prisma.expense.deleteMany({
@@ -279,17 +279,17 @@ export const groupRouter = createTRPCRouter({
         where: {
           groupId: input.groupId,
         },
-      })
+      });
       await ctx.prisma.recordedTransaction.deleteMany({
         where: {
           groupId: input.groupId,
         },
-      })
+      });
       await ctx.prisma.repayment.deleteMany({
         where: {
           groupId: input.groupId,
         },
-      })
+      });
       const groupDeletionResponse = await ctx.prisma.group.delete({
         where: {
           id: input.groupId,

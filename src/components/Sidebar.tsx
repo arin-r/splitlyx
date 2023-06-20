@@ -19,11 +19,14 @@ const Sidebar: FC<SidebarProps> = ({ groups }) => {
         {/* <li className="py-2">Dasboard</li>
         <li>Recent</li>
         <div className="divider"></div> */}
-        <div className="mb-3 flex justify-between">
+        <div className="mb-3 flex items-center justify-between">
           <div>Groups</div>
-          <div className="rounded-md px-2 hover:cursor-pointer hover:bg-neutral-focus">
-            <Link href="/groups/new">+</Link>
-          </div>
+          <Link
+            className="block rounded-md border-[2px] border-neutral-focus px-2 py-1 text-lg hover:cursor-pointer hover:bg-neutral-focus"
+            href="/groups/new"
+          >
+            + Add Group
+          </Link>
         </div>
         <ul className="ml-1 text-lg">
           {groups.length === 0 ? (

@@ -55,11 +55,14 @@ export default function Page({
         <div className="w-3/4">
           <div className="mt-1 flex">
             <div className="mr-4 mt-[3rem] w-1/4">
-              <div className="mb-3 flex justify-between">
+              <div className="mb-3 flex items-center justify-between">
                 <div className="text-xl">Groups</div>
-                <div className="rounded-md px-2 hover:cursor-pointer hover:bg-neutral-focus">
-                  <Link href="/groups/new">+</Link>
-                </div>
+                <Link
+                  className="block rounded-md border-[2px] border-neutral-focus px-2 py-1 hover:cursor-pointer hover:bg-neutral-focus"
+                  href="/groups/new"
+                >
+                  + Add Group
+                </Link>
               </div>
               <ul className="ml-1 text-lg">
                 {groups.length === 0 ? (
