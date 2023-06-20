@@ -57,33 +57,44 @@ const GroupBalances: FC<GroupBalancesProps> = ({
             </div>
           )}
           {balances &&
-            balances.map((balance, idx) => {
-              const owes: boolean = balance.balance > 0;
-              // const style = owes ? "text-error italic " : "text-success italic ";
-              return (
-                <li
-                  key={idx}
-                  className="border-b-[1px] border-[#272d35] pb-2 hover:cursor-pointer"
-                  onClick={() => {
-                    //This weird stuff is being done beacuse of the unoptimal data fetching described at the top of this component
-                    const idxInMembersArray = members.findIndex(
-                      (m) => m.id === balance.user.id
-                    );
-                    setSelectedMemberIndex(idxInMembersArray);
-                    setShowMemberRepaymentDetailsModal(true);
-                  }}
-                >
-                  <div className="py-3 text-left">
-                    <div className="text-lg font-bold">{balance.user.name}</div>
-                    <div className="text-base italic">
-                      {`${owes ? "owes " : "gets back "} ${Math.abs(
-                        balance.balance
-                      ).toFixed(2)}`}
-                    </div>
-                  </div>
+            (balances.length === 0 ? (
+              <>
+                <li className="my-1">No balances</li>
+                <li className="my-1 border-b-[1px] border-[#272d35] pb-2 hover:cursor-pointer">
+                  Nothing is owed by anyone, to anyone.
                 </li>
-              );
-            })}
+              </>
+            ) : (
+              balances.map((balance, idx) => {
+                const owes: boolean = balance.balance > 0;
+                // const style = owes ? "text-error italic " : "text-success italic ";
+                return (
+                  <li
+                    key={idx}
+                    className="border-b-[1px] border-[#272d35] pb-2 hover:cursor-pointer"
+                    onClick={() => {
+                      //This weird stuff is being done beacuse of the unoptimal data fetching described at the top of this component
+                      const idxInMembersArray = members.findIndex(
+                        (m) => m.id === balance.user.id
+                      );
+                      setSelectedMemberIndex(idxInMembersArray);
+                      setShowMemberRepaymentDetailsModal(true);
+                    }}
+                  >
+                    <div className="py-3 text-left">
+                      <div className="text-lg font-bold">
+                        {balance.user.name}
+                      </div>
+                      <div className="text-base italic">
+                        {`${owes ? "owes " : "gets back "} ${Math.abs(
+                          balance.balance
+                        ).toFixed(2)}`}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })
+            ))}
         </ul>
       </div>
     </>

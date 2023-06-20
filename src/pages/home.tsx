@@ -79,9 +79,9 @@ export default function Page({
               <div className="divider"></div>
             </div>
             <div className="w-3/4">
-              <div className="flex h-full items-center justify-center">
+              <div className="mt-4 flex h-full items-center justify-center">
                 <div>
-                  <h1 className="text-4xl font-bold">About Splitlyx</h1>
+                  <h1 className="mb-3 text-4xl font-bold">About Splitlyx</h1>
                   <p>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam
                     id congue neque, sed consequat justo. Sed a gravida velit,

@@ -13,6 +13,7 @@ import Sidebar from "~/components/Sidebar";
 import useGroupStore from "~/store/useGroupStore";
 import Transactions from "~/components/Transactions";
 import AddTransactionModal from "~/components/modals/AddTransactionModal";
+import { useRouter } from "next/router";
 
 export const getServerSideProps: GetServerSideProps<{
   groups: Group[];
@@ -105,6 +106,8 @@ const groupsPage = ({
     useState<boolean>(false);
   const [activeTab, setActiveTab] = useState("expenses");
 
+  const router = useRouter();
+
   const groupName = groups[groups.findIndex((g) => g.id === groupId)]!.name;
   const setGroupId = useGroupStore((state) => state.setGroupId);
   setGroupId(groupId);
@@ -132,6 +135,11 @@ const groupsPage = ({
     { enabled: activeTab === "transactions", refetchOnWindowFocus: false }
   );
 
+  const groupDeletor = api.group.delete.useMutation({
+    onSuccess() {
+      router.push("/home");
+    },
+  });
   const expenseCreator = api.expense.create.useMutation({
     onSuccess() {
       updateStuff();
@@ -197,7 +205,9 @@ const groupsPage = ({
               setShowAddTransactionModal(false);
             }}
             onTransactionCreationSuccess={() => {
+              updateBalances();
               setActiveTab("transactions");
+              setShowAddTransactionModal(false);
             }}
           />
         )}
@@ -265,6 +275,14 @@ const groupsPage = ({
               updateTransactions={updateTransactions}
               members={members}
             />
+            <button
+              onClick={() => {
+                groupDeletor.mutate({ groupId: groupId });
+              }}
+              className="btn-outline btn-error btn-wide btn m-3 "
+            >
+              Delete Group
+            </button>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { FC, ReactNode, useState } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import AddTransactionModal from "./AddTransactionModal";
 import useGroupStore from "~/store/useGroupStore";
@@ -40,6 +40,14 @@ const RepaymentDetailsModal: FC<RepaymentDetailsModalProps> = ({
     receiverName: string | null;
     amount: number;
   }>(null);
+
+  //A little hack to close the modal if there are no repayments. Not sure if this is the optimal solution.
+  useEffect(() => {
+    if (repaymentData && repaymentData.length === 0) {
+      onClose();
+    }
+  }, [repaymentData]);
+
   if (repaymentIsLoading) {
     return (
       <BaseLayout>

@@ -98,20 +98,6 @@ export const groupRouter = createTRPCRouter({
       });
     }),
 
-  getAllGroupContributions: protectedProcedure
-    .input(
-      z.object({
-        groupId: z.string(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      return ctx.prisma.groupContribution.findMany({
-        where: {
-          groupId: input.groupId,
-        },
-      });
-    }),
-
   getGroupBalances: protectedProcedure
     .input(
       z.object({
@@ -168,28 +154,6 @@ export const groupRouter = createTRPCRouter({
       }
 
       return balances;
-    }),
-
-  settleAllExpense: protectedProcedure
-    .input(z.object({ groupId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const groupContributions = await ctx.prisma.groupContribution.findMany({
-        where: {
-          groupId: input.groupId,
-        },
-        select: {
-          userId: true,
-          paid: true,
-          actualShare: true,
-          groupId: true,
-        },
-      });
-
-      await ctx.prisma.groupContribution.deleteMany({
-        where: {
-          groupId: input.groupId,
-        },
-      });
     }),
 
   addTransaction: protectedProcedure
@@ -290,8 +254,47 @@ export const groupRouter = createTRPCRouter({
 
       return transactions;
     }),
-  //dev only
-  deleteAll: protectedProcedure.mutation(async ({ ctx, input }) => {
-    return ctx.prisma.group.deleteMany({});
-  }),
+
+  delete: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      /**
+       * Why is cascade not working?
+       * If I only have grp.delete I get the following error 
+       * Foreign key constraint failed on the field: `Expense_groupId_fkey (index)` 
+       * 
+       * Interestingly, cascade works for the expense model. When an expense is deleted, 
+       * all expense contributions are automatically deleted (as expected, and desired)
+       */
+      await ctx.prisma.expense.deleteMany({
+        where: {
+          groupId: input.groupId,
+        },
+      });
+      await ctx.prisma.groupContribution.deleteMany({
+        where: {
+          groupId: input.groupId,
+        },
+      })
+      await ctx.prisma.recordedTransaction.deleteMany({
+        where: {
+          groupId: input.groupId,
+        },
+      })
+      await ctx.prisma.repayment.deleteMany({
+        where: {
+          groupId: input.groupId,
+        },
+      })
+      const groupDeletionResponse = await ctx.prisma.group.delete({
+        where: {
+          id: input.groupId,
+        },
+      });
+      return groupDeletionResponse;
+    }),
 });

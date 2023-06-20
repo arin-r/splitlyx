@@ -81,7 +81,7 @@ model Group {
 
 model Expense {
     id                   String                @id @default(cuid())
-    group                Group                 @relation(fields: [groupId], references: [id])
+    group                Group                 @relation(fields: [groupId], references: [id], onDelete: Cascade)
     groupId              String
     expenseContributions ExpenseContribution[]
     totalExpense         Float
@@ -117,7 +117,7 @@ model Repayment {
     payer           User   @relation("repayment_payingUser", fields: [payerId], references: [id])
     receiver        User   @relation("repayment_receivingUser", fields: [receiverId], references: [id])
     repaymentAmount Float
-    group           Group  @relation(fields: [groupId], references: [id])
+    group           Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
     groupId         String
 }
 
@@ -128,6 +128,6 @@ model RecordedTransaction {
     payer             User   @relation("transaction_payingUser", fields: [payerId], references: [id])
     receiver          User   @relation("transaction_receivingUser", fields: [receiverId], references: [id])
     transactionAmount Float
-    group             Group  @relation(fields: [groupId], references: [id])
+    group             Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
     groupId           String
 }
