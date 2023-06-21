@@ -12,8 +12,7 @@ interface GroupBalancesProps {
         balance: number;
       }[]
     | undefined;
-  balancesIsLoading: boolean;
-  balancesIsRefetching: boolean;
+    isLoading: boolean,
   updateBalances: () => void;
   updateTransactions: () => void;
   members: Member[];
@@ -21,8 +20,7 @@ interface GroupBalancesProps {
 
 const GroupBalances: FC<GroupBalancesProps> = ({
   balances,
-  balancesIsLoading,
-  balancesIsRefetching,
+  isLoading,
   updateBalances,
   updateTransactions,
   //encountered an error if I used useGroupStore(state => state.members);
@@ -51,7 +49,7 @@ const GroupBalances: FC<GroupBalancesProps> = ({
       <div className="mt-16 pl-4">
         <p className="py-2 text-xl">Group Balances</p>
         <ul>
-          {(balancesIsLoading || balancesIsRefetching) && (
+          {(isLoading) && (
             <div className="mb-4 mt-4 flex items-center justify-center">
               <progress className="progress w-56"></progress>
             </div>

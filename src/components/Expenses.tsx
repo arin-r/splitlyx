@@ -12,16 +12,14 @@ interface ExpensesProps {
         totalExpense: number;
       }[]
     | undefined;
-  expensesIsLoading: boolean;
-  expensesIsRefetching: boolean;
+    isLoading: boolean,
 }
 
 const Expenses: FC<ExpensesProps> = ({
   groupId,
   updateStuff,
   expenses,
-  expensesIsLoading,
-  expensesIsRefetching,
+  isLoading,
 }) => {
   const expenseDeletor = api.expense.delete.useMutation({
     onSuccess() {
@@ -29,6 +27,7 @@ const Expenses: FC<ExpensesProps> = ({
     },
   });
 
+  isLoading = isLoading || expenseDeletor.isLoading;
   const [showExpenseDetailsModel, setShowExpenseDetailsModal] =
     useState<boolean>(false);
 
@@ -51,7 +50,7 @@ const Expenses: FC<ExpensesProps> = ({
           }}
         />
       )}
-      {(!expenses || expensesIsLoading || expensesIsRefetching) && (
+      {(isLoading) && (
         <div className="mb-4 mt-4 flex items-center justify-center">
           <progress className="progress w-56"></progress>
         </div>

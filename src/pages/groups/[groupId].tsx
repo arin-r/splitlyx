@@ -194,6 +194,7 @@ const Page: FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
                 totalExpense: totalExpense,
               });
             }}
+            isExpenseCreating={expenseCreator.isLoading}
           />
         )}
         {showAddTransactionModal && (
@@ -253,8 +254,7 @@ const Page: FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
             {activeTab === "expenses" && (
               <Expenses
                 expenses={expensesQuery.data}
-                expensesIsLoading={expensesQuery.isLoading}
-                expensesIsRefetching={expensesQuery.isRefetching}
+                isLoading={expensesQuery.isLoading || expensesQuery.isRefetching || expenseCreator.isLoading}
                 updateStuff={updateStuff}
                 groupId={groupId}
               />
@@ -262,16 +262,14 @@ const Page: FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
             {activeTab === "transactions" && (
               <Transactions
                 transactions={transactionsQuery.data}
-                transactionsIsLoading={transactionsQuery.isLoading}
-                transactionsIsRefetching={transactionsQuery.isRefetching}
+                isLoading={transactionsQuery.isLoading || transactionsQuery.isRefetching}
               />
             )}
           </div>
           <div className="col-span-2">
             <GroupBalances
               balances={balancesQuery.data}
-              balancesIsLoading={balancesQuery.isLoading}
-              balancesIsRefetching={balancesQuery.isRefetching}
+              isLoading={balancesQuery.isLoading || balancesQuery.isRefetching}
               updateBalances={updateBalances}
               updateTransactions={updateTransactions}
               members={members}

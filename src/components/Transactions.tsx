@@ -10,21 +10,18 @@ interface TransactionsProps {
       }[]
     | undefined;
 
-  transactionsIsLoading: boolean;
-  transactionsIsRefetching: boolean;
+  isLoading: boolean,
 }
 
 const Transactions: FC<TransactionsProps> = ({
   transactions,
-  transactionsIsLoading,
-  transactionsIsRefetching,
+  isLoading,
 }) => {
-  const groupId = useGroupStore((state) => state.groupId);
   const members = useGroupStore((state) => state.members);
 
   return (
     <div>
-      {(!transactions || transactionsIsLoading || transactionsIsRefetching) && (
+      {(isLoading) && (
         <div className="mb-4 mt-4 flex items-center justify-center">
           <progress className="progress w-56"></progress>
         </div>

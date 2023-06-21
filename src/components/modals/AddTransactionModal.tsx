@@ -140,7 +140,7 @@ const AddTransactionModal: FC<AddTransactionModalProps> = ({
 
       <div className="flex justify-end">
         <button
-          className="btn-primary btn-sm btn mr-3"
+          className={`btn-primary btn-sm btn mr-3 ${transactionCreator.isLoading ? "loading loading-spinner" : ""}`}
           onClick={() => {
             transactionCreator.mutate({
               groupId: groupId,
@@ -148,7 +148,9 @@ const AddTransactionModal: FC<AddTransactionModalProps> = ({
               receiverId: receiverId,
               transactionAmount: amount,
             });
-          }}
+          }
+        }
+        disabled={transactionCreator.isLoading}
         >
           Confirm Transaction
         </button>

@@ -13,6 +13,7 @@ interface ConfirmationModalProps {
     totalExpense: number
   ) => void;
   onCancel: () => void;
+  isExpenseCreating: boolean,
 }
 
 const BaseLayout: FC<{ children: ReactNode }> = ({ children }) => {
@@ -45,6 +46,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   handleExpenseCreation,
   onCancel,
   members,
+  isExpenseCreating,
 }) => {
   const [sharedEqually, setSharedEqually] = useState<boolean>(true);
   const [expenseContributions, setExpenseContributions] = useState<
@@ -235,7 +237,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       </div>
       <div className="flex justify-end">
         <button
-          className="btn-primary btn-sm btn mr-3"
+          className={`btn-primary btn-sm btn mr-3 ${isExpenseCreating ? "loading loading-spinner" : ""}`}
           onClick={() => {
             if (sharedEqually) {
               handleExpenseCreation(
@@ -255,6 +257,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               );
             }
           }}
+          disabled={isExpenseCreating}
         >
           Confirm
         </button>
