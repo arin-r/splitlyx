@@ -254,7 +254,11 @@ const Page: FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
             {activeTab === "expenses" && (
               <Expenses
                 expenses={expensesQuery.data}
-                isLoading={expensesQuery.isLoading || expensesQuery.isRefetching || expenseCreator.isLoading}
+                isLoading={
+                  expensesQuery.isLoading ||
+                  expensesQuery.isRefetching ||
+                  expenseCreator.isLoading
+                }
                 updateStuff={updateStuff}
                 groupId={groupId}
               />
@@ -262,14 +266,22 @@ const Page: FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
             {activeTab === "transactions" && (
               <Transactions
                 transactions={transactionsQuery.data}
-                isLoading={transactionsQuery.isLoading || transactionsQuery.isRefetching}
+                isLoading={
+                  transactionsQuery.isLoading || transactionsQuery.isRefetching
+                }
               />
             )}
           </div>
           <div className="col-span-2">
             <GroupBalances
               balances={balancesQuery.data}
-              isLoading={balancesQuery.isLoading || balancesQuery.isRefetching}
+              isLoading={
+                balancesQuery.isLoading ||
+                balancesQuery.isRefetching ||
+                expenseCreator.isLoading ||
+                expensesQuery.isRefetching ||
+                expensesQuery.isLoading
+              }
               updateBalances={updateBalances}
               updateTransactions={updateTransactions}
               members={members}

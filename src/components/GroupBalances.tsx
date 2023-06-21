@@ -12,7 +12,7 @@ interface GroupBalancesProps {
         balance: number;
       }[]
     | undefined;
-    isLoading: boolean,
+  isLoading: boolean;
   updateBalances: () => void;
   updateTransactions: () => void;
   members: Member[];
@@ -49,7 +49,7 @@ const GroupBalances: FC<GroupBalancesProps> = ({
       <div className="mt-16 pl-4">
         <p className="py-2 text-xl">Group Balances</p>
         <ul>
-          {(isLoading) && (
+          {isLoading && (
             <div className="mb-4 mt-4 flex items-center justify-center">
               <progress className="progress w-56"></progress>
             </div>

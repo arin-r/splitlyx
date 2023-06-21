@@ -10,18 +10,15 @@ interface TransactionsProps {
       }[]
     | undefined;
 
-  isLoading: boolean,
+  isLoading: boolean;
 }
 
-const Transactions: FC<TransactionsProps> = ({
-  transactions,
-  isLoading,
-}) => {
+const Transactions: FC<TransactionsProps> = ({ transactions, isLoading }) => {
   const members = useGroupStore((state) => state.members);
 
   return (
     <div>
-      {(isLoading) && (
+      {isLoading && (
         <div className="mb-4 mt-4 flex items-center justify-center">
           <progress className="progress w-56"></progress>
         </div>

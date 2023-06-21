@@ -12,7 +12,7 @@ interface ExpensesProps {
         totalExpense: number;
       }[]
     | undefined;
-    isLoading: boolean,
+  isLoading: boolean;
 }
 
 const Expenses: FC<ExpensesProps> = ({
@@ -50,7 +50,7 @@ const Expenses: FC<ExpensesProps> = ({
           }}
         />
       )}
-      {(isLoading) && (
+      {isLoading && (
         <div className="mb-4 mt-4 flex items-center justify-center">
           <progress className="progress w-56"></progress>
         </div>
