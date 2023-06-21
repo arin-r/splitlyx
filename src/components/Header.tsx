@@ -11,7 +11,7 @@ export const Header = () => {
         className="block flex-1 pl-5 text-3xl font-bold hover:cursor-pointer"
         href="/home"
       >
-        Sp<span className="text-[hsl(280,100%,70%)]">lit</span>wise
+        Sp<span className="text-[hsl(280,100%,70%)]">lit</span>lyx
       </Link>
       <div className="flex-none gap-2">
         <div className="dropdown-end dropdown">
