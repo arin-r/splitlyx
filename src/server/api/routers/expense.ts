@@ -4,7 +4,6 @@ import calculateTransactions from "~/lib/calculateTransactions";
 import { areFloatsEqual } from "~/lib/floatComparison";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
-const getGroupConrtibutions = () => {};
 export const expenseRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
@@ -60,7 +59,7 @@ export const expenseRouter = createTRPCRouter({
         },
       });
 
-      let groupContributions = await ctx.prisma.groupContribution.findMany({
+      const groupContributions = await ctx.prisma.groupContribution.findMany({
         where: {
           groupId: input.groupId,
         },
@@ -90,11 +89,14 @@ export const expenseRouter = createTRPCRouter({
             userId: expContri.userId,
           });
         } else {
+          const temp = groupContributions[index];
+          if (!temp) {
+            throw new Error("Unexpected");
+          }
           groupContributions[index] = {
-            ...groupContributions[index]!,
-            actualShare:
-              groupContributions[index]?.actualShare! + expContri.actualShare,
-            paid: groupContributions[index]?.paid! + expContri.paid,
+            ...temp,
+            actualShare: temp.actualShare + expContri.actualShare,
+            paid: temp.paid + expContri.paid,
           };
         }
       }

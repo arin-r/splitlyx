@@ -1,9 +1,7 @@
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { Header } from "~/components/Header";
-import Sidebar from "~/components/Sidebar";
 import { prisma } from "~/server/db";
 
 export const getServerSideProps: GetServerSideProps<{

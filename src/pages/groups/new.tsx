@@ -1,9 +1,7 @@
 import { FC } from "react";
 import NewGroupForm from "~/components/NewGroupForm";
 
-interface newProps {}
-
-const page: FC<newProps> = ({}) => {
+const page: FC = () => {
   return (
     <>
       <NewGroupForm />

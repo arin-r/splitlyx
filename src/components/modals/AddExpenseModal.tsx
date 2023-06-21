@@ -152,7 +152,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <li>
               <a
                 onClick={() => {
-                  const elem = document.activeElement as any;
+                  const elem = document.activeElement as HTMLLabelElement;
                   if (elem) {
                     elem.blur();
                   }
@@ -165,7 +165,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <li>
               <a
                 onClick={() => {
-                  const elem = document.activeElement as any;
+                  const elem = document.activeElement as HTMLLabelElement;
                   if (elem) {
                     elem.blur();
                   }

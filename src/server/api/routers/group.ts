@@ -179,7 +179,7 @@ export const groupRouter = createTRPCRouter({
           },
         });
 
-      let groupContributions = await ctx.prisma.groupContribution.findMany({
+      const groupContributions = await ctx.prisma.groupContribution.findMany({
         where: {
           groupId: input.groupId,
         },

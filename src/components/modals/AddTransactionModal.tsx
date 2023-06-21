@@ -34,9 +34,15 @@ const AddTransactionModal: FC<AddTransactionModalProps> = ({
   const [receiverId, setReceiverId] = useState<string>(initialReceiverId);
 
   const payerIndex = members.findIndex((m) => m.id === payerId);
-  const payerName = members[payerIndex]?.name!;
+  const payerName = members[payerIndex]?.name;
   const receiverIndex = members.findIndex((m) => m.id === receiverId);
-  const receiverName = members[receiverIndex]?.name!;
+  const receiverName = members[receiverIndex]?.name;
+
+  if (!payerName || !receiverName) {
+    throw new Error(
+      "Unexpected condition. Every element of members array is expected to have an id and name field"
+    );
+  }
   return (
     <BaseLayout>
       {/* <div className="flex flex-col"> */}
@@ -64,7 +70,8 @@ const AddTransactionModal: FC<AddTransactionModalProps> = ({
                         key={idx}
                         className="my-1 hover:cursor-pointer"
                         onClick={() => {
-                          const elem = document.activeElement as any;
+                          const elem =
+                            document.activeElement as HTMLLabelElement;
                           if (elem) {
                             elem.blur();
                           }
@@ -97,7 +104,8 @@ const AddTransactionModal: FC<AddTransactionModalProps> = ({
                         key={idx}
                         className="my-1 hover:cursor-pointer"
                         onClick={() => {
-                          const elem = document.activeElement as any;
+                          const elem =
+                            document.activeElement as HTMLLabelElement;
                           if (elem) {
                             elem.blur();
                           }

@@ -33,11 +33,16 @@ const Transactions: FC<TransactionsProps> = ({
         <ul className="mx-2">
           {transactions.map((t, idx) => {
             const payerIndex = members.findIndex((m) => m.id === t.payerId);
-            const payerName = members[payerIndex]?.name!;
+            const payerName = members[payerIndex]?.name;
             const receiverIndex = members.findIndex(
               (m) => m.id === t.receiverId
             );
-            const receiverName = members[receiverIndex]?.name!;
+            const receiverName = members[receiverIndex]?.name;
+            if (!payerName || !receiverName) {
+              throw new Error(
+                "Unexpected condition. Every element of members array is expected to have an id and name field"
+              );
+            }
             return (
               <li key={idx} className="mb-2 hover:cursor-pointer">
                 <div className="rounded-md bg-neutral-focus p-4 shadow-md">

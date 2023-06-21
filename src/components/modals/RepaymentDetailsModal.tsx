@@ -87,7 +87,10 @@ const RepaymentDetailsModal: FC<RepaymentDetailsModalProps> = ({
                 <li key={idx} className="my-6 list-disc text-lg">
                   <div className="flex justify-between">
                     <div>
-                      {`${rp.payer.name} owes $${rp.repaymentAmount} to ${rp.receiver.name}`}
+                      {/* not sure how exactly to deal with user.name possibly being null */}
+                      {`${rp.payer.name || "name-not-found"} owes $${
+                        rp.repaymentAmount
+                      } to ${rp.receiver.name || "name-not-found"}`}
                     </div>
                     <div>
                       <button

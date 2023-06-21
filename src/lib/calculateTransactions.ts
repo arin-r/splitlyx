@@ -7,7 +7,7 @@ const calculateTransactions = (
   }[],
   groupId: string
 ) => {
-  let repayments: {
+  const repayments: {
     payerId: string;
     receiverId: string;
     repaymentAmount: number;

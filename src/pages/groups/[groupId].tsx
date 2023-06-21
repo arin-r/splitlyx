@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FC, useState } from "react";
 import { Header } from "~/components/Header";
 import { api } from "~/utils/api";
 
@@ -95,11 +95,11 @@ export const getServerSideProps: GetServerSideProps<{
  * However I want to display a list of Group Members which should be server side rendered. Every time an expense is added/removed
  * the balances change, which will cause weird loading state issues in the "Group Members" list.
  */
-const groupsPage = ({
+const Page: FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
   groups,
   members,
   groupId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+}) => {
   const [showAddExpenseModal, setShowAddExpenseModal] =
     useState<boolean>(false);
   const [showAddTransactionModal, setShowAddTransactionModal] =
@@ -137,7 +137,7 @@ const groupsPage = ({
 
   const groupDeletor = api.group.delete.useMutation({
     onSuccess() {
-      router.push("/home");
+      void router.push("/home");
     },
   });
   const expenseCreator = api.expense.create.useMutation({
@@ -199,8 +199,9 @@ const groupsPage = ({
         {showAddTransactionModal && (
           <AddTransactionModal
             defaultAmount={0}
-            initialPayerId={members[0]?.id!}
-            initialReceiverId={members[1]?.id!}
+            //small hack to get rid of TS errors. I KNOW for certain that each group has at least 2 members.
+            initialPayerId={members[0]?.id || ""}
+            initialReceiverId={members[1]?.id || ""}
             onCancel={() => {
               setShowAddTransactionModal(false);
             }}
@@ -300,4 +301,4 @@ type Member = {
   name: string | null;
 };
 
-export default groupsPage;
+export default Page;

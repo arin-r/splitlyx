@@ -22,8 +22,8 @@ const NewGroupForm: React.FC = () => {
 
   const router = useRouter();
   const groupCreator = api.group.create.useMutation({
-    onSuccess(data, variables, context) {
-      router.push(`/groups/${data.groupId}`);
+    onSuccess(data, _variables, _context) {
+      void router.push(`/groups/${data.groupId}`);
     },
   });
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
